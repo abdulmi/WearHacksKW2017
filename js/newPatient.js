@@ -11,5 +11,11 @@ $(document).ready(function(){
 
   $("#btnSaveNewPatient").on('click', function(events){
     console.log("save");
+    var name = document.getElementById('inputPatientName').value;
+    var id = document.getElementById('inputPatientID').value;
+    var phone = document.getElementById('inputPatientPhone').value;
+    var age = document.getElementById('inputPatientAge').value;
+    var method = document.getElementById('inputPatientMethod').value;
+    createPatient(id, name, phone, age, method);
   });
 })
