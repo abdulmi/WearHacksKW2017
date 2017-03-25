@@ -13,7 +13,6 @@ var perscriptions = firebase.database().ref('perscriptions');
 var twilio = require('../texting/text')
 
 
-PerscriptionID = 0;
 
 function schedule(frequency, duration, time){
     var Schedule = {
@@ -35,7 +34,9 @@ function schedule(frequency, duration, time){
     Schedule.Start = Schedule.Start*60*1000;
     var d = new Date();
     var epoch = d.getTime();
-    //epoch += 86400000;
+    if (!time){
+        epoch += 86400000;
+    }
     epoch= epoch - d.getMilliseconds() - d.getSeconds()*1000 - d.getMinutes()*60*1000 - d.getHours()*60*60*1000;
     Schedule.Start = Schedule.Start+epoch;   //In theory, sets time to Epoch time
 
@@ -67,15 +68,14 @@ function createPatient(id, name, number, age, method){
 }
 
 function createPerscription(id, name, detail, schedule){
-  console.log(schedule)
-    perscriptions.child(PerscriptionID.toString()).set({
+    /* CHANGE PERSCRIPTIONID */
+    perscriptions.push({
         PatientID: id,
         Name: name,
         Detail: detail,
         Schedule: schedule,
         Count: 0
     });
-    PerscriptionID ++;
 }
 
 function getPhoneNumber(id, callback){
@@ -165,8 +165,6 @@ function getAllPerscriptionsSnap(callback){
       callback(snapshot);
     });
 }
-//function sendMessage(perscription){
-//    if
 
 module.exports = {
   getAllPerscriptions:getAllPerscriptions,
@@ -185,8 +183,9 @@ function sendMessage(perscription){
         console.log("snap")
         console.log(pat.val())
         var message = "";
-        if (perscription.count == 0){
-            message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.detail + "\nFor any further questions, please text or call 510-555-1837.\n";
+        console.log("COUNT::: " + perscription.Count);
+        if (perscription.Count == 0){
+            message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
         }
         message += "Hi " + pat.val().Name + "! It is time to take your " + perscription.Name + ".";
         getPhoneNumber(perscription.PatientID, function(number){
@@ -196,12 +195,13 @@ function sendMessage(perscription){
                 twilio.text(number, message);
             }
             else if (pat.val().Method == 1){
-                twilio.call(number, message);
+                twilio.call(number, message.replace(/ /g,"+"));
             }
             else if (pat.val().Method == 2){
                 twilio.text(number, message);
-                twilio.call(number, message);
+                twilio.call(number, message.replace(/ /g,"+"));
             }
         });
     });
 }
+

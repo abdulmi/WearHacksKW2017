@@ -26,6 +26,9 @@ function notify() {
   })
 }
 
+var d = new Date();
+db.createPerscription(1414,"Meth","Blue",db.schedule(720,1000,d.getHours()*60+d.getMinutes()+1));
+
 var minutes = 0.1, the_interval = minutes * 60 * 1000;
 setInterval(function() {
   console.log("I am doing my 5 minutes check");
