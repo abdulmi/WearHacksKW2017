@@ -1,4 +1,5 @@
 $(document).ready(function(){
+// var db = require('../database/storage.js');
 var a = 0;
   $("#btnAddSubscription").on('click', function(events) {
 
@@ -8,7 +9,7 @@ var a = 0;
     var prescriptionDetailForm = '<form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" id="addNewPrescriptionDetails_' + a + '" type="text"/>    </form>';
     var prescriptionFooter = ' </div> </div>';
     var textDosage = '<label for="inputlg">Dosage Schedule</label>    <label for="input-sm">Frequency (per day)</label>    <input class="form-control input-lg" id="addNewPrescriptionDosage_' + a + '"type="text"/>   ';
-    textDosage = '   <label for="input-sm">Dosage Duration</label>    <input class="form-control input-lg" id="addNewPrescriptionDuration_' + a + '"type="text"/>   ';
+    textDosage += '   <label for="input-sm">Dosage Duration</label>    <input class="form-control input-lg" id="addNewPrescriptionDuration_' + a + '"type="text"/>   ';
 
     textDosage += '<label for="input-sm">Start time</label> <select class="hour input-lg" id="addNewPrescriptionStartTimeHour_'+ a + '" style="width: auto;">';
     for(var i = 0; i <= 9; i++){
@@ -50,16 +51,20 @@ var a = 0;
     createPatient(id, name, phone, age, method);
 
     for(var i = 0; i < a; i++){
-      var prescriptionName = document.getElementById('addNewPrescriptionName_'+a);
-      var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_'+a);
-      var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_'+a);
-      var prescriptionDuration = document.getElementById('addNewPrescriptionDuration_'+a);
+      var prescriptionName = document.getElementById('addNewPrescriptionName_'+a).value;
+      var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_'+a).value;
+      var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_'+a).value;
+      var prescriptionDuration = document.getElementById('addNewPrescriptionDuration_'+a).value;
       var selectedHour = document.getElementById('addNewPrescriptionStartTimeHour_'+a);
       var selectedHourValue = selectedHour.options[selectedHour.selectedIndex].value;
       var selectedMinute = document.getElementById('addNewPrescriptionStartTimeMinute_'+a);
-      var selecteMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
+      var selectedMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
 
-      // var schedule = schedule(prescriptionDosage, prescriptionDuration, )
+      console.log(prescriptionDetail);
+      console.log(prescriptionName);
+      var minutes = selectedHourValue * 60 + selectedMinuteValue;
+      var pSchedule = schedule(prescriptionDosage, prescriptionDuration, minutes);
+      createPerscription(id, prescriptionName, prescriptionDetail, pSchedule);
 
     }
 
