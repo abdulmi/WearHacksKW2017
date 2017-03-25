@@ -56,9 +56,8 @@ function createPatient(id, name, number, age, method){
 }
 
 function createPerscription(id, name, detail, schedule){
-    perscriptions.ref().set({ID: PerscriptionID});
-    perscriptions.ref(PerscriptionID).set({
-        PatiendID: id,
+    perscriptions.child(PerscriptionID).set({
+        PatientID: id,
         Name: name,
         Detail: detail,
         Schedule: schedule,
@@ -130,5 +129,19 @@ function getAllPatients(callback){
             pats[i++] = childSnapshot.val();
         });
         callback(pats);
-    }
+    });
 }
+
+function getAllPerscriptions(callback){
+    perscriptions.once("value").then(function(snapshot){
+        var i = 0;
+        var pers = {};
+        snapshot.forEach(function(childSnapshot){
+            pers[i++] = childSnapshot.val();
+        });
+        callback(pers);
+    });
+}
+
+//function sendMessage(perscription){
+//    if 
