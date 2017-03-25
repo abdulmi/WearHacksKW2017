@@ -19,20 +19,94 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/newPatient.js"></script>
 
 
 </head>
 
 <body id="page-top" class="index">
     <h1 class="text-center">App</h1>
-    <div class="container marketing">
+    <div class="container">
       <div class="row">
           <div class="col-lg-4">
-              New patient
+                <a href="#newPatientModal" class="portfolio-link" data-toggle="modal">
+                  <img src="res/new.png" class="img-responsive" alt="">
+                </a>
+            </input>
           </div>
           <div class="col-lg-4">
-              Existing Patient
+              <a href="#existingPatientsModal" class="portfolio-link" data-toggle="modal">
+                <img src="res/user.png" class="img-responsive" alt="">
+              </a>
           </div>
         </div>
     </div>
+
+    <!-- Button modals -->
+    <div class="portfolio-modal modal fade" id="newPatientModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="close-modal" data-dismiss="modal">
+                <div class="lr">
+                    <div class="rl">
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-2">
+                        <div class="modal-body" id="new_patient">
+                            <h2>New patient</h2>
+                            <hr class="star-primary">
+                            <form>
+                              <label for="inputlg">Name</label>
+                              <input class="form-control input-lg" type="text"/>
+                            </form>
+
+                            <form>
+                              <label for="inputlg">Age</label>
+                              <input class="form-control input-lg" type="text"/>
+                            </form>
+
+                            <form>
+                              <label for="inputlg">Phone number</label>
+                              <input class="form-control input-lg" type="text"/>
+                            </form>
+                            <br>
+
+                            <div id="prescription-container">
+                              <div class="prescription-section">
+                              <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/del_sm.png"/>
+                              <form>
+                                <label for="inputlg">Prescription Name</label>
+                                <input class="form-control input-lg" type="text"/>
+                              </form>    
+                                <form>      <label for="inputlg">Dosage</label>
+                                  <input class="form-control input-lg" type="text"/>
+                                </form>
+                                  <form>      <label for="inputlg">Details</label>
+                                <input class="form-control input-lg" type="text"/>
+                              </form>
+                            </div>
+
+                            </div>
+
+                            <div class="row">
+                              <div class="col-sm-2">
+                              <label for="inputlg">Add subscription</label>
+                              </div>
+                              <div class="col-sm-2">
+                                <input class="modal-subButton" id="btnAddSubscription" type="image" src="res/new_sm.png"/>
+                              </div>
+                            </div>
+
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                            <button type="button" class="btn btn-default" data-save="modal"><i class="fa fa-times"></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+
+</html>
