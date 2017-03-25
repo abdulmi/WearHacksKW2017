@@ -6,6 +6,7 @@ var authToken = '5817c9cf10b4c8589a0d08ae2376ed10';
 var client = require('twilio')(accountSid, authToken);
 
 function text (number,message) {
+  console.log("from text")
   client.messages.create({
       to: number,
       from: "+12268871350",
@@ -31,6 +32,11 @@ function call(number,message) {
         process.stdout.write(call.sid);
       }
   });
+}
+
+module.exports = {
+  call:call,
+  text:text
 }
 
 // text("+15192407058","Take your medicine")
