@@ -40,4 +40,22 @@ $(document).ready(function(){
     var method = document.getElementById('inputPatientMethod').value;
     createPatient(id, name, phone, age, method);
   });
+
+  $('#aExistingPatientModal').on('click', function(events){
+    
+    // var item = '<li class="list-group-item">Test Item</li>'
+    // $('#existingPatientList').append(item);
+
+    getAllPatients(function(data){
+      // $('#existingPatientList')
+      console.log(data);
+      for(var item in data){
+        console.log(data[item].Name);
+        var patientName = data[item].Name;
+        var listItem = '<li class="list-group-item">' + patientName + '</li>';
+        $('#existingPatientList').append(listItem);
+      }
+    });
+
+  });
 })
