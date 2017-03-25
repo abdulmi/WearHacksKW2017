@@ -115,7 +115,7 @@
                                   <label for="input-sm">Frequency (per day)</label>
                                   <input class="form-control input-lg" type="text"/>
                                   <label for="input-sm">Start time</label>
-                                    <select class="hour" style="width: auto;">
+                                    <select class="hour input-lg" style="width: auto;">
                                       <option value="0">00</option>
                                       <option value="1">01</option>
                                       <option value="2">02</option>
@@ -142,7 +142,7 @@
                                       <option value="23">23</option>
                                     </select>
                                     :
-                                    <select class="minutes" style="width: auto;">
+                                    <select class="minutes input-lg" style="width: auto;">
                                       <option value="0">00</option>
                                       <option value="1">01</option>
                                       <option value="2">02</option>
@@ -221,6 +221,34 @@
                                 <input class="modal-subButton" id="btnAddSubscription" type="image" src="res/lighter plus.png"/>
                               </div>
                             </div>
+
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                            <button type="button" class="btn btn-default" id="btnSaveNewPatient"><i class="fa fa-times"></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="portfolio-modal modal fade" id="existingPatientsModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="close-modal" data-dismiss="modal">
+                <div class="lr">
+                    <div class="rl">
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-2">
+                        <div class="modal-body" id="new_patient">
+                            <img src="res/Person.png"/>
+                            <div class="row">
+                              <h1>Patients</h1>
+                              <hr class="star-primary">
+                            </div>
+
 
                             <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                             <button type="button" class="btn btn-default" id="btnSaveNewPatient"><i class="fa fa-times"></i> Save</button>
