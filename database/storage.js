@@ -130,5 +130,5 @@ function getAllPatients(callback){
             pats[i++] = childSnapshot.val();
         });
         callback(pats);
-    }
+    });
 }
