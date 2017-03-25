@@ -31,8 +31,8 @@ function schedule(interval, duration, time){
 }
 
 function createPatient(id, name, number, age, method){
-    patients.ref().set({HealthCard: id});
-    patients.ref(id).set({
+    patients.set({HealthCard: id});
+    patients.set({
         Name: name,
         Phone: number,
         Age: age,
