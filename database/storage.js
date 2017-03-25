@@ -46,7 +46,6 @@ function getEpochPerscription(perscription, callback){
 }
 
 function createPatient(id, name, number, age, method){
-    // patients.set({HealthCard: id});
     patients.child(id).set({
         Name: name,
         Phone: number,
@@ -143,5 +142,26 @@ function getAllPerscriptions(callback){
     });
 }
 
-//function sendMessage(perscription){
-//    if 
+function sendMessage(perscription){
+    var pat;
+    getPatient(perscription.PatientID, function(d){
+        pat = d;
+    });
+    var message = "";
+    if (perscription.count == 0){
+        message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.detail + "\nFor any further questions, please text or call 510-555-1837.\n";
+    }
+    message += "Hi " + pat.Name + "! It is time to take your " + perscription.Name + ".";
+    getPhoneNumber(perscription.PatientID, function(number){
+        if (pat.Method == 0){
+            TWILLIO_TEXT(number, message);
+        }
+        else if (pat.Method == 1){
+            TWILIO_CALL(number, message);
+        }
+        else if (pat.Method == 2){
+            TWILIO_TEXT(number, message);
+            TWILIO_CALL(number, message);
+        }
+    });
+}
