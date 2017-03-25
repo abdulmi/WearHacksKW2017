@@ -68,7 +68,6 @@ function createPatient(id, name, number, age, method){
 }
 
 function createPerscription(id, name, detail, schedule){
-    /* CHANGE PERSCRIPTIONID */
     perscriptions.push({
         PatientID: id,
         Name: name,
@@ -175,33 +174,44 @@ module.exports = {
   getAllPerscriptionsSnap: getAllPerscriptionsSnap
 }
 
+function increment(perscriptionKey,count){
+    
 
-function sendMessage(perscription){
-    var pat;
-    getPatient(perscription.PatientID, function(d){
-        pat = d;
-        console.log("snap")
-        console.log(pat.val())
-        var message = "";
+    perscriptions.child(perscriptionKey).update({
+        Count: count+1
+    });
+}
+
+function sendMessage(perscription, perscriptionKey){
+    getPatient(perscription.PatientID, function (data){
+        console.log(perscription);
         console.log("COUNT::: " + perscription.Count);
-        if (perscription.Count == 0){
-            message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
+        console.log("DURATION::: " + perscription.Schedule.Duration);
+        if (perscription.Count < perscription.Schedule.Duration){
+            increment(perscriptionKey,perscription.Count);
+            var pat = data;
+            console.log("snap")
+            console.log(pat.val())
+            var message = "";
+            if (perscription.Count == 0){
+                message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
+            }
+            message += "Hi " + pat.val().Name + "! It is time to take your " + perscription.Name + ".";
+            getPhoneNumber(perscription.PatientID, function(number){
+              console.log(number)
+              console.log(message)
+                if (pat.val().Method == 0){
+                    twilio.text(number, message);
+                }
+                else if (pat.val().Method == 1){
+                    twilio.call(number, message.replace(/ /g,"+"));
+                }
+                else if (pat.val().Method == 2){
+                    twilio.text(number, message);
+                    twilio.call(number, message.replace(/ /g,"+"));
+                }
+            });
         }
-        message += "Hi " + pat.val().Name + "! It is time to take your " + perscription.Name + ".";
-        getPhoneNumber(perscription.PatientID, function(number){
-          console.log(number)
-          console.log(message)
-            if (pat.val().Method == 0){
-                twilio.text(number, message);
-            }
-            else if (pat.val().Method == 1){
-                twilio.call(number, message.replace(/ /g,"+"));
-            }
-            else if (pat.val().Method == 2){
-                twilio.text(number, message);
-                twilio.call(number, message.replace(/ /g,"+"));
-            }
-        });
     });
 }
 

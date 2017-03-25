@@ -17,7 +17,7 @@ function notify() {
           //   console.log(err)
           // }else{
             if((new Date().getTime() >= pTime)){
-              db.sendMessage(ps[perscription])
+              db.sendMessage(ps[perscription], perscription);
             }
           // }
         })
@@ -27,7 +27,8 @@ function notify() {
 }
 
 var d = new Date();
-db.createPerscription(1414,"Meth","Blue",db.schedule(720,1000,d.getHours()*60+d.getMinutes()+1));
+//db.createPerscription(1414,"Meth","Blue",db.schedule(720,7,d.getHours()*60+d.getMinutes()+1));
+db.createPerscription(1414,"Meth","Blue",db.schedule(720,10,962));
 
 var minutes = 0.1, the_interval = minutes * 60 * 1000;
 setInterval(function() {
