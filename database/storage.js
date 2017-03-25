@@ -90,7 +90,7 @@ function getPatientName(id, callback){
 function getPerscriptionName(id, callback){
     perscriptions.child(id + "/Name").once("value").then(function(snapshot){
         if (snapshot.val()){
-            callback(snapshot.valI());
+            callback(snapshot.val());
         }
         else{
             callback();
@@ -100,8 +100,8 @@ function getPerscriptionName(id, callback){
 
 function getPatient(id, callback){
     patients.child(id).once("value").then(function(snapshot){
-        if (snapshot.val()){
-            callback(snapshot.val());
+        if (snapshot){
+            callback(snapshot);
         }
         else{
             callback();
@@ -141,6 +141,13 @@ function getAllPerscriptions(callback){
         callback(pers);
     });
 }
+
+function getAllPatients2(callback){
+  patients.once("value").then(function(snapshot){
+    callback(snapshot);
+  });
+}
+
 
 function sendMessage(perscription){
     var pat;
