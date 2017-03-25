@@ -1,14 +1,23 @@
+var firebase = require('firebase')
+var config = {
+   apiKey: "AIzaSyCVMbpAX0ocPFzff3hIoyoJ909w6CkFB_Q",
+   authDomain: "wearhackskw2017-51c15.firebaseapp.com",
+   databaseURL: "https://wearhackskw2017-51c15.firebaseio.com",
+   storageBucket: "wearhackskw2017-51c15.appspot.com",
+   messagingSenderId: "453839360783"
+ };
+firebase.initializeApp(config);
 var Firebase = firebase.database().ref();
 var patients = firebase.database().ref('patients');
 var perscriptions = firebase.database().ref('perscriptions');
+var twilio = require('../texting/text')
 
 
-PerscriptionID = 0;
 
 function schedule(frequency, duration, time){
     var Schedule = {
         Frequency: frequency,
-        Duration: 1440, //default 24 hours (1/day)
+        Duration: duration, //default 24 hours (1/day)
         Start: 480  //Minutes
     }
     if (time){
@@ -18,14 +27,18 @@ function schedule(frequency, duration, time){
         Schedule.Start = 480;
         Schedule.Duration -= Math.ceil(frequency/2);    //Assume half the pills have been taken the day of
     }
-    Schedule.Interval = Math.floor((24*60-Schedule.start)/(frequency-1));
+    Schedule.Interval = Math.floor((24*60-Schedule.Start)/(frequency-1))* 60 * 1000;
+    // Schedule.Interval = (24*60-Schedule.Start)/(frequency-1);
 
-    var s = Schedule.Start*60*1000;
+    // var s = Schedule.Start*60*1000;
+    Schedule.Start = Schedule.Start*60*1000;
     var d = new Date();
-    d = d.getTime();
-    d += 86400000;
-    d= d - d.getMilliseconds() - d.getSeconds()*1000 - d.getMinutes()*60*1000 - d.getHours()*60*60*1000;
-    Schedule.Start = s+d;   //In theory, sets time to Epoch time
+    var epoch = d.getTime();
+    if (!time){
+        epoch += 86400000;
+    }
+    epoch= epoch - d.getMilliseconds() - d.getSeconds()*1000 - d.getMinutes()*60*1000 - d.getHours()*60*60*1000;
+    Schedule.Start = Schedule.Start+epoch;   //In theory, sets time to Epoch time
 
     return Schedule;
 }
@@ -36,7 +49,7 @@ function getEpochPerscription(perscription, callback){
     var c = perscription.Count;
     var f = perscription.Schedule.Frequency;
     var i = perscription.Schedule.Interval;
-    time = time + Math.floor(c/f) + i*(c%f);
+    time = time + (Math.floor(c/f)*86400000) + i*(c%f);
     if (time){
         callback(time);
     }
@@ -55,14 +68,14 @@ function createPatient(id, name, number, age, method){
 }
 
 function createPerscription(id, name, detail, schedule){
-    perscriptions.child(PerscriptionID).set({
+    /* CHANGE PERSCRIPTIONID */
+    perscriptions.push({
         PatientID: id,
         Name: name,
         Detail: detail,
         Schedule: schedule,
         Count: 0
     });
-    PerscriptionID ++;
 }
 
 function getPhoneNumber(id, callback){
@@ -103,9 +116,12 @@ function getPatient(id, callback){
         if (snapshot){
             callback(snapshot);
         }
-        else{
-            callback();
-        }
+        // if (snapshot.val()){
+        //     callback(snapshot.val());
+        // }
+        // else{
+        //     callback();
+        // }
     });
 }
 
@@ -142,6 +158,22 @@ function getAllPerscriptions(callback){
     });
 }
 
+function getAllPerscriptionsSnap(callback){
+    perscriptions.once("value").then(function(snapshot){
+      callback(snapshot);
+    });
+}
+
+module.exports = {
+  getAllPerscriptions:getAllPerscriptions,
+  getEpochPerscription:getEpochPerscription,
+  createPerscription:createPerscription,
+  schedule:schedule,
+  sendMessage: sendMessage,
+  getAllPerscriptionsSnap: getAllPerscriptionsSnap
+}
+
+
 function getAllPatients2(callback){
   patients.once("value").then(function(snapshot){
     callback(snapshot);
@@ -153,22 +185,28 @@ function sendMessage(perscription){
     var pat;
     getPatient(perscription.PatientID, function(d){
         pat = d;
-    });
-    var message = "";
-    if (perscription.count == 0){
-        message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.detail + "\nFor any further questions, please text or call 510-555-1837.\n";
-    }
-    message += "Hi " + pat.Name + "! It is time to take your " + perscription.Name + ".";
-    getPhoneNumber(perscription.PatientID, function(number){
-        if (pat.Method == 0){
-            TWILLIO_TEXT(number, message);
+        console.log("snap")
+        console.log(pat.val())
+        var message = "";
+        console.log("COUNT::: " + perscription.Count);
+        if (perscription.Count == 0){
+            message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
         }
-        else if (pat.Method == 1){
-            TWILIO_CALL(number, message);
-        }
-        else if (pat.Method == 2){
-            TWILIO_TEXT(number, message);
-            TWILIO_CALL(number, message);
-        }
+        message += "Hi " + pat.val().Name + "! It is time to take your " + perscription.Name + ".";
+        getPhoneNumber(perscription.PatientID, function(number){
+          console.log(number)
+          console.log(message)
+            if (pat.val().Method == 0){
+                twilio.text(number, message);
+            }
+            else if (pat.val().Method == 1){
+                twilio.call(number, message.replace(/ /g,"+"));
+            }
+            else if (pat.val().Method == 2){
+                twilio.text(number, message);
+                twilio.call(number, message.replace(/ /g,"+"));
+            }
+        });
     });
 }
+
