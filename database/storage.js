@@ -38,6 +38,7 @@ function createPatient(id, name, number, age, method){
         Age: age,
         Method: method
     });
+    console.log("success");
 }
 
 function createPerscription(id, name, detail, schedule){
@@ -106,6 +107,3 @@ function getPerscription(id, callback){
         }
     });
 }
-
-
-
