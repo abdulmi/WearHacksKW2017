@@ -1,7 +1,6 @@
-
-var Firebase = require("firebase");
-var patients = new Firebase("https://wearhackskw2017.firebaseio.com/patients");
-var perscriptions = new Firebase("https://wearhackskw2017.firebaseio.com/perscriptions");
+var Firebase = firebase.database().ref();
+var patients = firebase.database().ref('patients');
+var perscriptions = firebase.database().ref('perscriptions');
 
 
 PerscriptionID = 0;
@@ -31,8 +30,8 @@ function schedule(interval, duration, time){
 }
 
 function createPatient(id, name, number, age, method){
-    patients.set({HealthCard: id});
-    patients.set({
+    // patients.set({HealthCard: id});
+    patients.child(id).set({
         Name: name,
         Phone: number,
         Age: age,
@@ -64,19 +63,24 @@ function getPhoneNumber(id, callback){
     });
 }
 
-function getPatientName(id, callback){
-    patients.ref(id + "/Name/").once("value", function(snapshot){
-        if (snapshot.val()){
-            callback(snapshot.val());
+function getPatientName(id){
+
+    patients.child(id).once('value').then(function(snapshot){
+        console.log("start");
+        if (snapshot.key){
+            console.log(snapshot.child('Name').val());
+            return (snapshot.key);
         }
         else{
-            callback();
+            console.log("null");
+            return null;
         }
     });
+
 }
 
 function getPerscriptionName(id, callback){
-    perscriptions.ref(id + "/Name/").once("value", function(snapshot){
+    perscriptions.child(id + "/Name/").once("value", function(snapshot){
         if (snapshot.val()){
             callback(snapshot.valI());
         }
@@ -87,7 +91,7 @@ function getPerscriptionName(id, callback){
 }
 
 function getPatient(id, callback){
-    patients.ref().once("value", function(snapshot){
+    patients.child().once("value", function(snapshot){
         if (snapshot.val()){
             callback(snapshot.val());
         }
