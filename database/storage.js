@@ -6,14 +6,6 @@ var perscriptions = new Firebase("https://wearhackskw2017.firebaseio.com/perscri
 
 PerscriptionID = 0;
 
-function time(h, m){
-    var Time = {
-        hours: h,
-        minutes: minutes
-    };
-    return Time;
-}
-
 function schedule(interval, duration, time){
     var Schedule = {
         Interval: interval,
