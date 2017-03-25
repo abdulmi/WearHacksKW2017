@@ -5,28 +5,44 @@ var perscriptions = firebase.database().ref('perscriptions');
 
 PerscriptionID = 0;
 
-function time(h, m){
-    var Time = {
-        hours: h,
-        minutes: minutes
-    };
-    return Time;
-}
-
-function schedule(interval, duration, time){
+function schedule(frequency, duration, time){
     var Schedule = {
-        Interval: interval,
-        Duration: duration,
-        Start: time(8,0),
+        Frequency: frequency,
+        Duration: 1440, //default 24 hours (1/day)
+        Start: 480  //Minutes
     }
     if (time){
         Schedule.Start = time;
     }
     else{
-        Schedule.Start = time(8,0);
-        Schedule.Count = Math.ceil(24/interval.Hour)-1;
+        Schedule.Start = 480;
+        Schedule.Duration -= Math.ceil(frequency/2);    //Assume half the pills have been taken the day of
     }
+    Schedule.Interval = Math.floor((24*60-Schedule.start)/(frequency-1));
+
+    var s = Schedule.Start*60*1000;
+    var d = new Date();
+    d = d.getTime();
+    d += 86400000;
+    d= d - d.getMilliseconds() - d.getSeconds()*1000 - d.getMinutes()*60*1000 - d.getHours()*60*60*1000;
+    Schedule.Start = s+d;   //In theory, sets time to Epoch time
+
     return Schedule;
+}
+
+//Returns the Epoch time of the time it is looking out for
+function getEpochPerscription(perscription, callback){
+    var time = perscription.Schedule.Start;
+    var c = perscription.Count;
+    var f = perscription.Schedule.Frequency;
+    var i = perscription.Schedule.Interval;
+    time = time + Math.floor(c/f) + i*(c%f);
+    if (time){
+        callback(time);
+    }
+    else{
+        callback();
+    }
 }
 
 function createPatient(id, name, number, age, method){
@@ -37,7 +53,6 @@ function createPatient(id, name, number, age, method){
         Age: age,
         Method: method
     });
-    console.log("success");
 }
 
 function createPerscription(id, name, detail, schedule){
@@ -53,7 +68,7 @@ function createPerscription(id, name, detail, schedule){
 }
 
 function getPhoneNumber(id, callback){
-    patients.ref(id + "/Phone/").once("value", function(snapshot){
+    patients.child(id + "/Phone/").once("value").then(function(snapshot){
         if (snapshot.val()){
             callback(snapshot.val());
         }
@@ -63,24 +78,19 @@ function getPhoneNumber(id, callback){
     });
 }
 
-function getPatientName(id){
-
-    patients.child(id).once('value').then(function(snapshot){
-        console.log("start");
-        if (snapshot.key){
-            console.log(snapshot.child('Name').val());
-            return (snapshot.key);
+function getPatientName(id, callback){
+    patients.child(id + "/Name").once("value").then(function(snapshot){
+        if (snapshot.val()){
+            callback(snapshot.val());
         }
         else{
-            console.log("null");
-            return null;
+            callback();
         }
     });
-
 }
 
 function getPerscriptionName(id, callback){
-    perscriptions.child(id + "/Name/").once("value", function(snapshot){
+    perscriptions.child(id + "/Name").once("value").then(function(snapshot){
         if (snapshot.val()){
             callback(snapshot.valI());
         }
@@ -91,7 +101,7 @@ function getPerscriptionName(id, callback){
 }
 
 function getPatient(id, callback){
-    patients.child().once("value", function(snapshot){
+    patients.child(id).once("value").then(function(snapshot){
         if (snapshot.val()){
             callback(snapshot.val());
         }
@@ -102,7 +112,7 @@ function getPatient(id, callback){
 }
 
 function getPerscription(id, callback){
-    perscriptions.ref().once("value", function(snapshot){
+    perscriptions.child(id).once("value").then(function(snapshot){
         if (snapshot.val()){
             callback(snapshot.val());
         }
@@ -110,4 +120,15 @@ function getPerscription(id, callback){
             callback();
         }
     });
+}
+
+function getAllPatients(callback){
+    patients.once("value").then(function(snapshot){
+        var i = 0;
+        var pats = {};
+        snapshot.forEach(function(childSnapshot){
+            pats[i++] = childSnapshot.val();
+        });
+        callback(pats);
+    }
 }
