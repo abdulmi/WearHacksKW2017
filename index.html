@@ -15,6 +15,7 @@
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/patient.css" rel="stylesheet">
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -36,17 +37,20 @@
 
 </head>
 
-<body id="page-top" class="index">
+<body id="page-top" class="index full">
+  <div class="page-header">
     <h1 class="text-center">App</h1>
+  </div><!--Page Header -->
+
     <div class="container">
       <div class="row">
-          <div class="col-lg-4">
+          <div class="col-lg-6">
                 <a href="#newPatientModal" class="portfolio-link" data-toggle="modal">
                   <img src="res/NewPatientButton.png" class="img-responsive" alt="">
                 </a>
             </input>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
               <a href="#existingPatientsModal" class="portfolio-link" id="aExistingPatientModal" data-toggle="modal">
                 <img src="res/ExistingPatientsButton.png" class="img-responsive" alt="">
               </a>
@@ -55,8 +59,8 @@
     </div>
 
     <!-- Button modals -->
-    <div class="portfolio-modal modal fade" id="newPatientModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-content">
+    <div class="portfolio-modal modal fade col-lg-12" id="newPatientModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-content modal_opacity">
             <div class="close-modal" data-dismiss="modal">
                 <div class="lr">
                     <div class="rl">
@@ -108,18 +112,18 @@
                             </div>
 
                             <div class="row pull-right">
-                              <div class="col-sm-3">
+                              <div class="col-sm-6">
                                 <input class="modal-subButton" id="btnAddSubscription" type="image" src="res/lighter plus.png"/>
                               </div>
-                              <div class="col-sm-3">
+                              <div class="col-sm-6">
                               <label for="inputlg">Add subscription</label>
                               </div>
 
                             </div>
 
                             <br>
-                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            <button type="button" class="btn btn-default" id="btnSaveNewPatient"><i class="fa fa-times"></i> Save</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i>Close</button>
+                            <button type="button" class="btn btn-default" id="btnSaveNewPatient" data-toggle="modal" data-target="#modalSuccessfullySaved" data-dismiss="modal"><i class="fa fa-times"></i>Save</button>
                         </div>
                     </div>
                 </div>
@@ -127,9 +131,30 @@
         </div>
     </div>
 
+        <!-- Successfully Saved Modal -->
+    <div id="modalSuccessfullySaved" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Success!</h4>
+          </div>
+          <div class="modal-body">
+            <p>New patient has been successfully added to the database</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
 <!-- Existing Patients Modal -->
     <div class="portfolio-modal modal fade" id="existingPatientsModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-content">
+        <div class="modal-content modal_opacity">
             <div class="close-modal" data-dismiss="modal">
                 <div class="lr">
                     <div class="rl">
@@ -169,13 +194,19 @@
                               <div class="col-lg-7">
                                 <h2>Profile Preview</h2>
                                 <div class="row">
-                                  <label >Name</label>
+                                  <label>Name</label>
+                                  <!-- <h1 id="existingPatientName">Name goes here</h1> -->
+                                  <input class="form-control input-lg" type="text" id="existingPatientName"/>
                                 </div>
                                 <div class="row">
-                                  <label >Phone Number</label>
+                                  <label>Phone Number</label>
+                                  <!-- <h1 id="existingPatientPhone"></h1> -->
+                                  <input class="form-control input-lg" type="text" id="existingPatientPhone"/>
                                 </div>
                                 <div class="row">
                                   <label>Age</label>
+                                  <!-- <h1 id="existingPatientAge"></h1> -->
+                                  <input class="form-control input-lg" type="text" id="existingPatientAge"/>
                                 </div>
 
 
@@ -184,10 +215,20 @@
                                   </div><!--existing-prescription-container-->
                               </div><!--col-lg-7-->
 
+                              <div class="row pull-right">
+                                <div class="col-sm-6">
+                                  <input class="modal-subButton" id="btnAddSubscription-existing" type="image" src="res/lighter plus.png"/>
+                                </div>
+                                <div class="col-sm-6">
+                                <label for="inputlg">Add subscription</label>
+                                </div>
+
+                              </div>
+
                             <br>
                             <div class="row">
-                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                              <button type="button" class="btn btn-default" id="btnSaveNewPatient"><i class="fa fa-times"></i> Save</button>
+                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i>Close</button>
+                              <button type="button" class="btn btn-default"><i class="fa fa-times"></i> Save</button>
                             </div>
                         </div>
                     </div>

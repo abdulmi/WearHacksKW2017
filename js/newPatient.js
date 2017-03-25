@@ -1,9 +1,16 @@
 $(document).ready(function(){
+var a = 0;
   $("#btnAddSubscription").on('click', function(events) {
-    $("#prescription-container").append('<div id="prescription-container">      <div class="prescription-section">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/><form><label for="inputlg">Prescription Name</label> <input class="form-control input-lg" type="text"/>    </form>    <form>      <label for="inputlg">Dosage</label>      <input class="form-control input-lg" type="text"/>    </form>    <form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" type="text"/>    </form> </div> </div>');
 
-    var textDosage = '<label for="inputlg">Dosage schedule</label>    <label for="input-sm">Frequency (per day)</label>    <input class="form-control input-lg" type="text"/>    <label for="input-sm">Start time</label> <select class="hour input-lg" style="width: auto;">';
+    a++;
+    var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
+    var prescriptionNameForm = '<form><label for="inputlg">Prescription Name</label> <input class="form-control input-lg" id="addNewPrescriptionName_' + a + '" type="text"/> </form>';
+    var prescriptionDetailForm = '<form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" id="addNewPrescriptionDetails_' + a + '" type="text"/>    </form>';
+    var prescriptionFooter = ' </div> </div>';
+    var textDosage = '<label for="inputlg">Dosage Schedule</label>    <label for="input-sm">Frequency (per day)</label>    <input class="form-control input-lg" id="addNewPrescriptionDosage_' + a + '"type="text"/>   ';
+    textDosage = '   <label for="input-sm">Dosage Duration</label>    <input class="form-control input-lg" id="addNewPrescriptionDuration_' + a + '"type="text"/>   ';
 
+    textDosage += '<label for="input-sm">Start time</label> <select class="hour input-lg" id="addNewPrescriptionStartTimeHour_'+ a + '" style="width: auto;">';
     for(var i = 0; i <= 9; i++){
       textDosage += "<option value=" + i + ">0" + i + "</option>";
     }
@@ -12,7 +19,7 @@ $(document).ready(function(){
     }
     textDosage += "</select>";
     textDosage += ":";
-    textDosage += '<select class="minutes input-lg" style="width: auto;">'
+    textDosage += '<select class="minutes input-lg" id="addNewPrescriptionStartTimeMinute_'+ a + '"style="width: auto;">'
     for(var i = 0; i <= 9; i++){
       textDosage += "<option value=" + i + ">0" + i + "</option>";
     }
@@ -21,14 +28,16 @@ $(document).ready(function(){
     }
     textDosage += "</select>"
     textDosage += "</form>"
-    $('#prescription-container').append(textDosage);
+    $('#prescription-container').append(prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter);
 
-      console.log("added");
+      console.log(a);
   });
 
   $("#prescription-container").on('click', '#btnRemovePrescription', function(events) {
     $(this).closest('div').remove();
     console.log("removed");
+    a--;
+    console.log(a);
   });
 
   $("#btnSaveNewPatient").on('click', function(events){
@@ -39,23 +48,61 @@ $(document).ready(function(){
     var age = document.getElementById('inputPatientAge').value;
     var method = document.getElementById('inputPatientMethod').value;
     createPatient(id, name, phone, age, method);
+
+    for(var i = 0; i < a; i++){
+      var prescriptionName = document.getElementById('addNewPrescriptionName_'+a);
+      var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_'+a);
+      var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_'+a);
+      var prescriptionDuration = document.getElementById('addNewPrescriptionDuration_'+a);
+      var selectedHour = document.getElementById('addNewPrescriptionStartTimeHour_'+a);
+      var selectedHourValue = selectedHour.options[selectedHour.selectedIndex].value;
+      var selectedMinute = document.getElementById('addNewPrescriptionStartTimeMinute_'+a);
+      var selecteMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
+
+      // var schedule = schedule(prescriptionDosage, prescriptionDuration, )
+
+    }
+
+    console.log(selectedValue);
+
+
   });
 
   $('#aExistingPatientModal').on('click', function(events){
-    
-    // var item = '<li class="list-group-item">Test Item</li>'
-    // $('#existingPatientList').append(item);
 
-    getAllPatients(function(data){
-      // $('#existingPatientList')
-      console.log(data);
-      for(var item in data){
-        console.log(data[item].Name);
-        var patientName = data[item].Name;
-        var listItem = '<li class="list-group-item">' + patientName + '</li>';
-        $('#existingPatientList').append(listItem);
-      }
+      getAllPatients2(function(data){
+        $('#existingPatientList').empty();
+        data.forEach(function(child){
+          console.log(child.key);
+          var patientName = child.child("Name").val();
+          var listItem = '<li class="list-group-item" value="' + child.key + '">' + patientName + '</li>';
+          console.log(listItem);
+          $('#existingPatientList').append(listItem);
+        })})
     });
 
-  });
-})
+
+  $('#existingPatientList').on('click', 'li', function(events){
+    // alert($(this).val());
+    var patientID = $(this).val();
+
+    //update patient name
+    console.log(patientID);
+
+    getPatientName(patientID, function(data){
+      $('#existingPatientName').val(data);
+    });
+
+    //update patient age
+    getPhoneNumber(patientID, function(data){
+      $('#existingPatientPhone').val(data);
+    });
+
+    //update patient phone number
+    getPatient(patientID, function(data){
+      console.log(data);
+      $('#existingPatientAge').val(data.child('Age').val());
+    });
+
+  })
+});
