@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/dougouk/WearHacksKW2017#readme",
   "dependencies": {
-    "firebase": "^3.7.3"
+    "firebase": "^3.7.3",
+    "twilio": "^2.11.1"
   }
 }
