@@ -5,7 +5,7 @@ var a = 0;
 
 var enterNewPrescription = function(){
   a++;
-  var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
+  var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription'+'" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
   var prescriptionNameForm = '<form><label for="inputlg">Prescription Name</label> <input class="form-control input-lg" id="addNewPrescriptionName_' + a + '" type="text"/> </form>';
   var prescriptionDetailForm = '<form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" id="addNewPrescriptionDetails_' + a + '" type="text"/>    </form>';
   var prescriptionFooter = ' </div> </div>';
@@ -73,6 +73,12 @@ var savePrescription = function(){
     console.log(a);
   });
 
+  $("#existing-prescription-container").on('click', '#btnRemovePrescription', function(events) {
+    $(this).closest('div').remove();
+    console.log("removed");
+    a--;
+  });
+
   $('#btnAddSubscription-existing').on('click', function(){
     $('#existing-prescription-container').append(enterNewPrescription());
   });
@@ -88,7 +94,8 @@ var savePrescription = function(){
         data.forEach(function(child){
           console.log(child.key);
           var patientName = child.child("Name").val();
-          var listItem = '<li class="list-group-item" value="' + child.key + '">' + patientName + '</li>';
+          var listItem = $('<li class="list-group-item" value="' + child.key + '"> </li>')
+            .text(patientName);
           console.log(listItem);
           $('#existingPatientList').append(listItem);
         })})
@@ -118,9 +125,23 @@ var savePrescription = function(){
 
     //update perscription list
     $('#prescriptionList').empty();
-    getPerscription(selectedPatientID, function(data){
-      console.log(data.child('Name').val());
+    getAllPerscriptionsSnap(function(data){
+      console.log(data.forEach(function(childSnapshot){
+        var id = childSnapshot.child('PatientID').val();
+        if(selectedPatientID === id) {
+          console.log("true");
+          var name = childSnapshot.child('Name').val();
+          var listItem = $('<li class="list-group-item"></li>').text(name);
+          $('#prescriptionList').append(listItem);
+        }
+      }));
     });
 
-  })
+  });
+
+  $('#prescriptionList').on('click', 'li', function(events){
+    console.log("clicked");
+    $('#btnRemovePrescription').
+    $('#existing-prescription-container').append(enterNewPrescription());
+  });
 });
