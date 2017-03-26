@@ -28,5 +28,8 @@
     "browserify": "^14.1.0",
     "nodemon": "^1.11.0",
     "serve": "^5.1.1"
+  },
+  "engines": {
+    "node": "7.4.0"
   }
 }
