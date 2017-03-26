@@ -3,6 +3,9 @@
   width: 100px;
 }
 
+#mNavBar{
+  height: 110px;
+}
 .homepage-button-link{
   display: block;
   position: relative;

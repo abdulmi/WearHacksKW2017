@@ -2,9 +2,12 @@ $(document).ready(function(){
 var db = require('../database/storage.js');
 var a = 0;
 
-var enterNewPrescription = function(){
+var enterNewPrescription = function(modification){
+  if(!modification){
+    modification = "<h2>Add Prescription</h2>"
+  }
   a++;
-  var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription'+'" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
+  var prescriptionHeader = ' <div id="prescription-container"> '+ modification + '   <input class="modal-subButton" id="btnRemovePrescription'+'" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
   var prescriptionNameForm = '<form><label for="inputlg">Prescription Name</label> <input class="form-control input-lg" id="addNewPrescriptionName_' + a + '" type="text"/> </form>';
   var prescriptionDetailForm = '<form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" id="addNewPrescriptionDetails_' + a + '" type="text"/>    </form>';
   var prescriptionFooter = ' </div> </div>';
@@ -153,7 +156,7 @@ var savePrescription = function(){
 
   $('#prescriptionList').on('click', 'li', function(events){
     $('#btnRemovePrescription').closest('div').remove();
-    $('#existing-prescription-container').append(enterNewPrescription());
+    $('#existing-prescription-container').append(enterNewPrescription("<h2>Modify Prescription</h2>"));
     var prescriptionKey = $(this).attr('value');
     console.log(prescriptionKey);
 
