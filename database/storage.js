@@ -24,7 +24,7 @@ function schedule(frequency, duration, time){
         Schedule.Start = 480;
         Schedule.Duration -= Math.ceil(frequency/2);    //Assume half the pills have been taken the day of
     }
-    Schedule.Interval = Math.floor((24*60-Schedule.Start)/(frequency-1))* 60 * 1000;
+    Schedule.Interval = Math.floor((24*60-time)/(frequency-1)* 60 * 1000);
     // Schedule.Interval = (24*60-Schedule.Start)/(frequency-1);
 
     // var s = Schedule.Start*60*1000;
