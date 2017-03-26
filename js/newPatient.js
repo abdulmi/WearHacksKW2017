@@ -94,7 +94,8 @@ var savePrescription = function(){
         data.forEach(function(child){
           console.log(child.key);
           var patientName = child.child("Name").val();
-          var listItem = '<li class="list-group-item" value="' + child.key + '">' + patientName + '</li>';
+          var listItem = $('<li class="list-group-item" value="' + child.key + '"> </li>')
+            .text(patientName);
           console.log(listItem);
           $('#existingPatientList').append(listItem);
         })})
@@ -124,9 +125,23 @@ var savePrescription = function(){
 
     //update perscription list
     $('#prescriptionList').empty();
-    getPerscription(selectedPatientID, function(data){
-      console.log(data.child('Name').val());
+    getAllPerscriptionsSnap(function(data){
+      console.log(data.forEach(function(childSnapshot){
+        var id = childSnapshot.child('PatientID').val();
+        if(selectedPatientID === id) {
+          console.log("true");
+          var name = childSnapshot.child('Name').val();
+          var listItem = $('<li class="list-group-item"></li>').text(name);
+          $('#prescriptionList').append(listItem);
+        }
+      }));
     });
 
-  })
+  });
+
+  $('#prescriptionList').on('click', 'li', function(events){
+    console.log("clicked");
+    $('#btnRemovePrescription').
+    $('#existing-prescription-container').append(enterNewPrescription());
+  });
 });
