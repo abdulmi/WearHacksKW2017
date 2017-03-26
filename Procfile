@@ -1,1 +1,1 @@
-web: node texting/server.js
+web: node server.js

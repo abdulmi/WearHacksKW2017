@@ -1,7 +1,7 @@
 var express = require('express')
 var app = express()
 app.use(express.static('./'))
-var db = require('../database/storage')
+var db = require('./database/storage')
 
 function notify() {
   console.log("from notify")
