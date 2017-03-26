@@ -11,7 +11,6 @@ var Firebase = firebase.database().ref();
 var patients = firebase.database().ref('patients');
 var perscriptions = firebase.database().ref('perscriptions');
 
-
 function schedule(frequency, duration, time){
     var Schedule = {
         Frequency: frequency,
@@ -165,13 +164,26 @@ module.exports = {
   getAllPerscriptions:getAllPerscriptions,
   getEpochPerscription:getEpochPerscription,
   createPerscription:createPerscription,
+  createPatient: createPatient,
   schedule:schedule,
   sendMessage: sendMessage,
-  getAllPerscriptionsSnap: getAllPerscriptionsSnap
+  getAllPerscriptionsSnap: getAllPerscriptionsSnap,
+  getAllPatients: getAllPatients,
+  getAllPatients2: getAllPatients2,
+  getPatientName: getPatientName,
+  getPhoneNumber: getPhoneNumber,
+  getPerscriptionName: getPerscriptionName,
+  getPatient: getPatient,
+  getPerscription: getPerscription,
+  updateProfile: updateProfile,
+  Firebase: Firebase,
+  patients: patients,
+  perscriptions: perscriptions
 }
 
 
 function getAllPatients2(callback){
+  console.log("please work");
   patients.once("value").then(function(snapshot){
     callback(snapshot);
   });
@@ -183,6 +195,13 @@ function increment(perscriptionKey,count){
     perscriptions.child(perscriptionKey).update({
         Count: count+1
     });
+}
+
+function updateProfile(patientKey, name, phoneNumber){
+  patients.child(patientKey).update({
+    Name: name,
+    Phone: phoneNumber
+  })
 }
 
 function sendMessage(perscription, perscriptionKey){

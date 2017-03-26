@@ -1,8 +1,6 @@
-var $ = require('jquery')
 $(document).ready(function(){
-// var db = require('../database/storage.js');
+var db = require('../database/storage.js');
 var a = 0;
-
 
 var enterNewPrescription = function(){
   a++;
@@ -43,7 +41,7 @@ var savePatient = function(){
   var phone = document.getElementById('inputPatientPhone').value;
   var age = document.getElementById('inputPatientAge').value;
   var method = document.getElementById('inputPatientMethod').value;
-  createPatient(id, name, phone, age, method);
+  db.createPatient(id, name, phone, age, method);
 }
 
 var selectedPatientID;
@@ -59,8 +57,8 @@ var savePrescription = function(){
     var selectedMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
 
     var minutes = selectedHourValue * 60 + selectedMinuteValue;
-    var pSchedule = schedule(prescriptionDosage, prescriptionDuration, minutes);
-    createPerscription(selectedPatientID, prescriptionName, prescriptionDetail, pSchedule);
+    var pSchedule = db.schedule(prescriptionDosage, prescriptionDuration, minutes);
+    db.createPerscription(selectedPatientID, prescriptionName, prescriptionDetail, pSchedule);
   }
 }
   $("#btnAddSubscription").on('click', function(){
@@ -86,11 +84,24 @@ var savePrescription = function(){
 
   $("#btnSaveNewPatient").on('click', savePrescription);
 
-  $('#btnSaveNewPrescription').on('click', savePrescription);
+  $('#btnSaveNewPrescription').on('click', function(){
+    updateProfile()
+    if(a>0){
+      savePrescription()
+    }
+  });
+
+  function updateProfile(){
+    var updatedName = document.getElementById('existingPatientName').value;
+    var updatedPhone = document.getElementById('existingPatientPhone').value;
+
+    db.updateProfile(selectedPatientID, updatedName, updatedPhone)
+    console.log('updated')
+  }
 
   $('#aExistingPatientModal').on('click', function(events){
-
-      getAllPatients2(function(data){
+      console.log("showing patients");
+      db.getAllPatients2(function(data){
         $('#existingPatientList').empty();
         data.forEach(function(child){
           console.log(child.key);
@@ -102,7 +113,6 @@ var savePrescription = function(){
         })})
     });
 
-
   $('#existingPatientList').on('click', 'li', function(events){
     // alert($(this).val());
     selectedPatientID = $(this).val();
@@ -110,39 +120,56 @@ var savePrescription = function(){
     //update patient name
     console.log(selectedPatientID);
 
-    getPatientName(selectedPatientID, function(data){
+    db.getPatientName(selectedPatientID, function(data){
       $('#existingPatientName').val(data);
     });
 
     //update patient age
-    getPhoneNumber(selectedPatientID, function(data){
+    db.getPhoneNumber(selectedPatientID, function(data){
       $('#existingPatientPhone').val(data);
     });
 
     //update patient phone number
-    getPatient(selectedPatientID, function(data){
+    db.getPatient(selectedPatientID, function(data){
       $('#existingPatientAge').val(data.child('Age').val());
     });
 
     //update perscription list
     $('#prescriptionList').empty();
-    getAllPerscriptionsSnap(function(data){
-      console.log(data.forEach(function(childSnapshot){
+    db.getAllPerscriptionsSnap(function(data){
+      data.forEach(function(childSnapshot){
         var id = childSnapshot.child('PatientID').val();
         if(selectedPatientID === id) {
-          console.log("true");
+          console.log(childSnapshot.key);
           var name = childSnapshot.child('Name').val();
-          var listItem = $('<li class="list-group-item"></li>').text(name);
+          var listItem = $('<li class="list-group-item" value="'+childSnapshot.key+'"></li>').text(name);
+          console.log(listItem)
           $('#prescriptionList').append(listItem);
         }
-      }));
+      });
     });
 
   });
 
   $('#prescriptionList').on('click', 'li', function(events){
-    console.log("clicked");
-    $('#btnRemovePrescription').
+    $('#btnRemovePrescription').closest('div').remove();
     $('#existing-prescription-container').append(enterNewPrescription());
+    var prescriptionKey = $(this).attr('value');
+    console.log(prescriptionKey);
+
+    db.getPerscription(prescriptionKey, function(data){
+      var name = data.child('Name').val()
+      var details = data.child('Detail').val()
+      var duration = data.child('Schedule').child('Duration').val()
+      var frequency = data.child('Schedule').child('Frequency').val()
+
+      console.log('addNewPrescriptionName_'+a)
+
+      $('#addNewPrescriptionName_'+a).val(name)
+      $('#addNewPrescriptionDetails_'+a).val(details)
+      $('#addNewPrescriptionDosage_'+a).val(duration)
+      $('#addNewPrescriptionDuration_'+a).val(frequency)
+
+    })
   });
 });
