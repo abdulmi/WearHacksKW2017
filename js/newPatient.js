@@ -1,3 +1,4 @@
+var $ = require('jquery')
 $(document).ready(function(){
 // var db = require('../database/storage.js');
 var a = 0;
