@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var firebase = require('firebase');
+var text = require('../texting/text.js');
+
 var config = {
     apiKey: "AIzaSyCVMbpAX0ocPFzff3hIoyoJ909w6CkFB_Q",
     authDomain: "wearhackskw2017-51c15.firebaseapp.com",
@@ -24,7 +26,7 @@ function schedule(frequency, duration, time) {
         Schedule.Start = 480;
         Schedule.Duration -= Math.ceil(frequency / 2); //Assume half the pills have been taken the day of
     }
-    Schedule.Interval = Math.floor((24 * 60 - Schedule.Start) / (frequency - 1)) * 60 * 1000;
+    Schedule.Interval = Math.floor((24 * 60 - time) / (frequency - 1) * 60 * 1000);
     // Schedule.Interval = (24*60-Schedule.Start)/(frequency-1);
 
     // var s = Schedule.Start*60*1000;
@@ -209,7 +211,7 @@ function sendMessage(perscription, perscriptionKey) {
             console.log(pat.val());
             var message = "";
             if (perscription.Count == 0) {
-                message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
+                // message += "This is your doctor office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
             }
             message += "Hi " + pat.val().Name + "! It is time to take your " + perscription.Name + ".";
             getPhoneNumber(perscription.PatientID, function (number) {
@@ -228,7 +230,7 @@ function sendMessage(perscription, perscriptionKey) {
     });
 }
 
-},{"firebase":119}],2:[function(require,module,exports){
+},{"../texting/text.js":378,"firebase":119}],2:[function(require,module,exports){
 $(document).ready(function () {
   var db = require('../database/storage.js');
   var a = 0;
@@ -267,6 +269,7 @@ $(document).ready(function () {
     return prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter;
     // $('#prescription-container').append(prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter);
   };
+  var selectedPatientID;
   var savePatient = function () {
     console.log("save");
     var name = document.getElementById('inputPatientName').value;
@@ -275,24 +278,24 @@ $(document).ready(function () {
     var age = document.getElementById('inputPatientAge').value;
     var method = document.getElementById('inputPatientMethod').value;
     db.createPatient(id, name, phone, age, method);
+    selectedPatientID = id;
   };
 
-  var selectedPatientID;
   var savePrescription = function () {
-    for (var i = 0; i < a; i++) {
-      var prescriptionName = document.getElementById('addNewPrescriptionName_' + a).value;
-      var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_' + a).value;
-      var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_' + a).value;
-      var prescriptionDuration = document.getElementById('addNewPrescriptionDuration_' + a).value;
-      var selectedHour = document.getElementById('addNewPrescriptionStartTimeHour_' + a);
-      var selectedHourValue = selectedHour.options[selectedHour.selectedIndex].value;
-      var selectedMinute = document.getElementById('addNewPrescriptionStartTimeMinute_' + a);
-      var selectedMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
+    // for(var i = 0; i < a; i++){
+    var prescriptionName = document.getElementById('addNewPrescriptionName_' + a).value;
+    var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_' + a).value;
+    var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_' + a).value;
+    var prescriptionDuration = document.getElementById('addNewPrescriptionDuration_' + a).value;
+    var selectedHour = document.getElementById('addNewPrescriptionStartTimeHour_' + a);
+    var selectedHourValue = selectedHour.options[selectedHour.selectedIndex].value;
+    var selectedMinute = document.getElementById('addNewPrescriptionStartTimeMinute_' + a);
+    var selectedMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
 
-      var minutes = selectedHourValue * 60 + selectedMinuteValue;
-      var pSchedule = db.schedule(prescriptionDosage, prescriptionDuration, minutes);
-      db.createPerscription(selectedPatientID, prescriptionName, prescriptionDetail, pSchedule);
-    }
+    var minutes = parseInt(selectedHourValue) * 60 + parseInt(selectedMinuteValue);
+    var pSchedule = db.schedule(prescriptionDosage, prescriptionDuration, minutes);
+    db.createPerscription(selectedPatientID, prescriptionName, prescriptionDetail, pSchedule);
+    // }
   };
   $("#btnAddSubscription").on('click', function () {
     $('#prescription-container').append(enterNewPrescription());
@@ -315,7 +318,12 @@ $(document).ready(function () {
     $('#existing-prescription-container').append(enterNewPrescription());
   });
 
-  $("#btnSaveNewPatient").on('click', savePrescription);
+  $("#btnSaveNewPatient").on('click', function () {
+    savePatient();
+    if (a > 0) {
+      savePrescription();
+    }
+  });
 
   $('#btnSaveNewPrescription').on('click', function () {
     updateProfile();
@@ -349,11 +357,12 @@ $(document).ready(function () {
   $('#existingPatientList').on('click', 'li', function (events) {
     // alert($(this).val());
     selectedPatientID = $(this).val();
+    console.log("selected patient id: " + selectedPatientID);
 
     //update patient name
-    console.log(selectedPatientID);
 
     db.getPatientName(selectedPatientID, function (data) {
+      console.log("patient name is retrieved as : " + data);
       $('#existingPatientName').val(data);
     });
 
@@ -372,11 +381,9 @@ $(document).ready(function () {
     db.getAllPerscriptionsSnap(function (data) {
       data.forEach(function (childSnapshot) {
         var id = childSnapshot.child('PatientID').val();
-        if (selectedPatientID === id) {
-          console.log(childSnapshot.key);
+        if (selectedPatientID == id) {
           var name = childSnapshot.child('Name').val();
           var listItem = $('<li class="list-group-item" value="' + childSnapshot.key + '"></li>').text(name);
-          console.log(listItem);
           $('#prescriptionList').append(listItem);
         }
       });
@@ -4081,7 +4088,7 @@ aws4.sign = function(request, credentials) {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./lru":27,"_process":222,"buffer":67,"crypto":78,"querystring":233,"url":368}],27:[function(require,module,exports){
+},{"./lru":27,"_process":222,"buffer":67,"crypto":78,"querystring":237,"url":368}],27:[function(require,module,exports){
 module.exports = function(size) {
   return new LruCache(size)
 }
@@ -5169,7 +5176,7 @@ BufferList.prototype.destroy = function destroy () {
 module.exports = BufferList
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":67,"readable-stream/duplex":235,"util":373}],34:[function(require,module,exports){
+},{"buffer":67,"readable-stream/duplex":239,"util":373}],34:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 
@@ -9899,7 +9906,7 @@ function getr(priv) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bn.js":34,"buffer":67,"randombytes":234}],56:[function(require,module,exports){
+},{"bn.js":34,"buffer":67,"randombytes":238}],56:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 exports['RSA-SHA224'] = exports.sha224WithRSAEncryption = {
@@ -11246,7 +11253,7 @@ util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./binding":61,"_process":222,"_stream_transform":243,"assert":24,"buffer":67,"util":373}],63:[function(require,module,exports){
+},{"./binding":61,"_process":222,"_stream_transform":247,"assert":24,"buffer":67,"util":373}],63:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
 },{"dup":36}],64:[function(require,module,exports){
 /*jshint node:true */
@@ -14183,7 +14190,7 @@ var publicEncrypt = require('public-encrypt')
   }
 })
 
-},{"browserify-cipher":52,"browserify-sign":57,"browserify-sign/algos":56,"create-ecdh":73,"create-hash":74,"create-hmac":77,"diffie-hellman":87,"pbkdf2":217,"public-encrypt":223,"randombytes":234}],79:[function(require,module,exports){
+},{"browserify-cipher":52,"browserify-sign":57,"browserify-sign/algos":56,"create-ecdh":73,"create-hash":74,"create-hmac":77,"diffie-hellman":87,"pbkdf2":217,"public-encrypt":223,"randombytes":238}],79:[function(require,module,exports){
 var Stream = require('stream').Stream;
 var util = require('util');
 
@@ -15217,7 +15224,7 @@ function formatReturnValue(bn, enc) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./generatePrime":89,"bn.js":34,"buffer":67,"miller-rabin":190,"randombytes":234}],89:[function(require,module,exports){
+},{"./generatePrime":89,"bn.js":34,"buffer":67,"miller-rabin":190,"randombytes":238}],89:[function(require,module,exports){
 var randomBytes = require('randombytes');
 module.exports = findPrime;
 findPrime.simpleSieve = simpleSieve;
@@ -15324,7 +15331,7 @@ function findPrime(bits, gen) {
 
 }
 
-},{"bn.js":34,"miller-rabin":190,"randombytes":234}],90:[function(require,module,exports){
+},{"bn.js":34,"miller-rabin":190,"randombytes":238}],90:[function(require,module,exports){
 module.exports={
     "modp1": {
         "gen": "02",
@@ -20232,7 +20239,7 @@ module.exports={
         "spec": ">=6.0.0 <7.0.0",
         "type": "range"
       },
-      "/Users/abdul/WearHacksKW2017/node_modules/browserify-sign"
+      "/Users/veljkodimic/Documents/WearHacksKW2017/node_modules/browserify-sign"
     ]
   ],
   "_from": "elliptic@>=6.0.0 <7.0.0",
@@ -20267,7 +20274,7 @@ module.exports={
   "_shasum": "cac9af8762c85836187003c8dfe193e5e2eae5df",
   "_shrinkwrap": null,
   "_spec": "elliptic@^6.0.0",
-  "_where": "/Users/abdul/WearHacksKW2017/node_modules/browserify-sign",
+  "_where": "/Users/veljkodimic/Documents/WearHacksKW2017/node_modules/browserify-sign",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -38441,7 +38448,7 @@ var y = d * 365.25
  *  - `long` verbose formatting [false]
  *
  * @param {String|Number} val
- * @param {Object} options
+ * @param {Object} [options]
  * @throws {Error} throw an error if val is not a non-empty string or a number
  * @return {String|Number}
  * @api public
@@ -38987,7 +38994,7 @@ exports.rfc3986 = rfc3986
 exports.generateBase = generateBase
 
 
-},{"crypto":78,"querystring":233}],199:[function(require,module,exports){
+},{"crypto":78,"querystring":237}],199:[function(require,module,exports){
 exports.endianness = function () { return 'LE' };
 
 exports.hostname = function () {
@@ -46032,7 +46039,7 @@ function nonZero(len, crypto) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"./mgf":224,"./withPublic":227,"./xor":228,"bn.js":34,"browserify-rsa":55,"buffer":67,"create-hash":74,"parse-asn1":215,"randombytes":234}],227:[function(require,module,exports){
+},{"./mgf":224,"./withPublic":227,"./xor":228,"bn.js":34,"browserify-rsa":55,"buffer":67,"create-hash":74,"parse-asn1":215,"randombytes":238}],227:[function(require,module,exports){
 (function (Buffer){
 var bn = require('bn.js');
 function withPublic(paddedMsg, key) {
@@ -48533,6 +48540,495 @@ return Q;
 
 }).call(this,require('_process'))
 },{"_process":222}],231:[function(require,module,exports){
+'use strict';
+
+var Stringify = require('./stringify');
+var Parse = require('./parse');
+
+module.exports = {
+    stringify: Stringify,
+    parse: Parse
+};
+
+},{"./parse":232,"./stringify":233}],232:[function(require,module,exports){
+'use strict';
+
+var Utils = require('./utils');
+
+var has = Object.prototype.hasOwnProperty;
+
+var defaults = {
+    delimiter: '&',
+    depth: 5,
+    arrayLimit: 20,
+    parameterLimit: 1000,
+    strictNullHandling: false,
+    plainObjects: false,
+    allowPrototypes: false,
+    allowDots: false,
+    decoder: Utils.decode
+};
+
+var parseValues = function parseValues(str, options) {
+    var obj = {};
+    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
+
+    for (var i = 0; i < parts.length; ++i) {
+        var part = parts[i];
+        var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
+
+        var key, val;
+        if (pos === -1) {
+            key = options.decoder(part);
+            val = options.strictNullHandling ? null : '';
+        } else {
+            key = options.decoder(part.slice(0, pos));
+            val = options.decoder(part.slice(pos + 1));
+        }
+        if (has.call(obj, key)) {
+            obj[key] = [].concat(obj[key]).concat(val);
+        } else {
+            obj[key] = val;
+        }
+    }
+
+    return obj;
+};
+
+var parseObject = function parseObject(chain, val, options) {
+    if (!chain.length) {
+        return val;
+    }
+
+    var root = chain.shift();
+
+    var obj;
+    if (root === '[]') {
+        obj = [];
+        obj = obj.concat(parseObject(chain, val, options));
+    } else {
+        obj = options.plainObjects ? Object.create(null) : {};
+        var cleanRoot = root.charAt(0) === '[' && root.charAt(root.length - 1) === ']' ? root.slice(1, -1) : root;
+        var index = parseInt(cleanRoot, 10);
+        if (
+            !isNaN(index) &&
+            root !== cleanRoot &&
+            String(index) === cleanRoot &&
+            index >= 0 &&
+            (options.parseArrays && index <= options.arrayLimit)
+        ) {
+            obj = [];
+            obj[index] = parseObject(chain, val, options);
+        } else {
+            obj[cleanRoot] = parseObject(chain, val, options);
+        }
+    }
+
+    return obj;
+};
+
+var parseKeys = function parseKeys(givenKey, val, options) {
+    if (!givenKey) {
+        return;
+    }
+
+    // Transform dot notation to bracket notation
+    var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, '[$1]') : givenKey;
+
+    // The regex chunks
+
+    var brackets = /(\[[^[\]]*])/;
+    var child = /(\[[^[\]]*])/g;
+
+    // Get the parent
+
+    var segment = brackets.exec(key);
+    var parent = segment ? key.slice(0, segment.index) : key;
+
+    // Stash the parent if it exists
+
+    var keys = [];
+    if (parent) {
+        // If we aren't using plain objects, optionally prefix keys
+        // that would overwrite object prototype properties
+        if (!options.plainObjects && has.call(Object.prototype, parent)) {
+            if (!options.allowPrototypes) {
+                return;
+            }
+        }
+
+        keys.push(parent);
+    }
+
+    // Loop through children appending to the array until we hit depth
+
+    var i = 0;
+    while ((segment = child.exec(key)) !== null && i < options.depth) {
+        i += 1;
+        if (!options.plainObjects && has.call(Object.prototype, segment[1].slice(1, -1))) {
+            if (!options.allowPrototypes) {
+                return;
+            }
+        }
+        keys.push(segment[1]);
+    }
+
+    // If there's a remainder, just add whatever is left
+
+    if (segment) {
+        keys.push('[' + key.slice(segment.index) + ']');
+    }
+
+    return parseObject(keys, val, options);
+};
+
+module.exports = function (str, opts) {
+    var options = opts || {};
+
+    if (options.decoder !== null && options.decoder !== undefined && typeof options.decoder !== 'function') {
+        throw new TypeError('Decoder has to be a function.');
+    }
+
+    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : defaults.delimiter;
+    options.depth = typeof options.depth === 'number' ? options.depth : defaults.depth;
+    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : defaults.arrayLimit;
+    options.parseArrays = options.parseArrays !== false;
+    options.decoder = typeof options.decoder === 'function' ? options.decoder : defaults.decoder;
+    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : defaults.allowDots;
+    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : defaults.plainObjects;
+    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : defaults.allowPrototypes;
+    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : defaults.parameterLimit;
+    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+
+    if (str === '' || str === null || typeof str === 'undefined') {
+        return options.plainObjects ? Object.create(null) : {};
+    }
+
+    var tempObj = typeof str === 'string' ? parseValues(str, options) : str;
+    var obj = options.plainObjects ? Object.create(null) : {};
+
+    // Iterate over the keys and setup the new object
+
+    var keys = Object.keys(tempObj);
+    for (var i = 0; i < keys.length; ++i) {
+        var key = keys[i];
+        var newObj = parseKeys(key, tempObj[key], options);
+        obj = Utils.merge(obj, newObj, options);
+    }
+
+    return Utils.compact(obj);
+};
+
+},{"./utils":234}],233:[function(require,module,exports){
+'use strict';
+
+var Utils = require('./utils');
+
+var arrayPrefixGenerators = {
+    brackets: function brackets(prefix) {
+        return prefix + '[]';
+    },
+    indices: function indices(prefix, key) {
+        return prefix + '[' + key + ']';
+    },
+    repeat: function repeat(prefix) {
+        return prefix;
+    }
+};
+
+var defaults = {
+    delimiter: '&',
+    strictNullHandling: false,
+    skipNulls: false,
+    encode: true,
+    encoder: Utils.encode
+};
+
+var stringify = function stringify(object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots) {
+    var obj = object;
+    if (typeof filter === 'function') {
+        obj = filter(prefix, obj);
+    } else if (obj instanceof Date) {
+        obj = obj.toISOString();
+    } else if (obj === null) {
+        if (strictNullHandling) {
+            return encoder ? encoder(prefix) : prefix;
+        }
+
+        obj = '';
+    }
+
+    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean' || Utils.isBuffer(obj)) {
+        if (encoder) {
+            return [encoder(prefix) + '=' + encoder(obj)];
+        }
+        return [prefix + '=' + String(obj)];
+    }
+
+    var values = [];
+
+    if (typeof obj === 'undefined') {
+        return values;
+    }
+
+    var objKeys;
+    if (Array.isArray(filter)) {
+        objKeys = filter;
+    } else {
+        var keys = Object.keys(obj);
+        objKeys = sort ? keys.sort(sort) : keys;
+    }
+
+    for (var i = 0; i < objKeys.length; ++i) {
+        var key = objKeys[i];
+
+        if (skipNulls && obj[key] === null) {
+            continue;
+        }
+
+        if (Array.isArray(obj)) {
+            values = values.concat(stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
+        } else {
+            values = values.concat(stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
+        }
+    }
+
+    return values;
+};
+
+module.exports = function (object, opts) {
+    var obj = object;
+    var options = opts || {};
+    var delimiter = typeof options.delimiter === 'undefined' ? defaults.delimiter : options.delimiter;
+    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : defaults.skipNulls;
+    var encode = typeof options.encode === 'boolean' ? options.encode : defaults.encode;
+    var encoder = encode ? (typeof options.encoder === 'function' ? options.encoder : defaults.encoder) : null;
+    var sort = typeof options.sort === 'function' ? options.sort : null;
+    var allowDots = typeof options.allowDots === 'undefined' ? false : options.allowDots;
+    var objKeys;
+    var filter;
+
+    if (options.encoder !== null && options.encoder !== undefined && typeof options.encoder !== 'function') {
+        throw new TypeError('Encoder has to be a function.');
+    }
+
+    if (typeof options.filter === 'function') {
+        filter = options.filter;
+        obj = filter('', obj);
+    } else if (Array.isArray(options.filter)) {
+        objKeys = filter = options.filter;
+    }
+
+    var keys = [];
+
+    if (typeof obj !== 'object' || obj === null) {
+        return '';
+    }
+
+    var arrayFormat;
+    if (options.arrayFormat in arrayPrefixGenerators) {
+        arrayFormat = options.arrayFormat;
+    } else if ('indices' in options) {
+        arrayFormat = options.indices ? 'indices' : 'repeat';
+    } else {
+        arrayFormat = 'indices';
+    }
+
+    var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
+
+    if (!objKeys) {
+        objKeys = Object.keys(obj);
+    }
+
+    if (sort) {
+        objKeys.sort(sort);
+    }
+
+    for (var i = 0; i < objKeys.length; ++i) {
+        var key = objKeys[i];
+
+        if (skipNulls && obj[key] === null) {
+            continue;
+        }
+
+        keys = keys.concat(stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
+    }
+
+    return keys.join(delimiter);
+};
+
+},{"./utils":234}],234:[function(require,module,exports){
+'use strict';
+
+var hexTable = (function () {
+    var array = new Array(256);
+    for (var i = 0; i < 256; ++i) {
+        array[i] = '%' + ((i < 16 ? '0' : '') + i.toString(16)).toUpperCase();
+    }
+
+    return array;
+}());
+
+var has = Object.prototype.hasOwnProperty;
+
+exports.arrayToObject = function (source, options) {
+    var obj = options.plainObjects ? Object.create(null) : {};
+    for (var i = 0; i < source.length; ++i) {
+        if (typeof source[i] !== 'undefined') {
+            obj[i] = source[i];
+        }
+    }
+
+    return obj;
+};
+
+exports.merge = function (target, source, options) {
+    if (!source) {
+        return target;
+    }
+
+    if (typeof source !== 'object') {
+        if (Array.isArray(target)) {
+            target.push(source);
+        } else if (typeof target === 'object') {
+            if (options.plainObjects || options.allowPrototypes || !has.call(Object.prototype, source)) {
+                target[source] = true;
+            }
+        } else {
+            return [target, source];
+        }
+
+        return target;
+    }
+
+    if (typeof target !== 'object') {
+        return [target].concat(source);
+    }
+
+    var mergeTarget = target;
+    if (Array.isArray(target) && !Array.isArray(source)) {
+        mergeTarget = exports.arrayToObject(target, options);
+    }
+
+    return Object.keys(source).reduce(function (acc, key) {
+        var value = source[key];
+
+        if (has.call(acc, key)) {
+            acc[key] = exports.merge(acc[key], value, options);
+        } else {
+            acc[key] = value;
+        }
+        return acc;
+    }, mergeTarget);
+};
+
+exports.decode = function (str) {
+    try {
+        return decodeURIComponent(str.replace(/\+/g, ' '));
+    } catch (e) {
+        return str;
+    }
+};
+
+exports.encode = function (str) {
+    // This code was originally written by Brian White (mscdex) for the io.js core querystring library.
+    // It has been adapted here for stricter adherence to RFC 3986
+    if (str.length === 0) {
+        return str;
+    }
+
+    var string = typeof str === 'string' ? str : String(str);
+
+    var out = '';
+    for (var i = 0; i < string.length; ++i) {
+        var c = string.charCodeAt(i);
+
+        if (
+            c === 0x2D || // -
+            c === 0x2E || // .
+            c === 0x5F || // _
+            c === 0x7E || // ~
+            (c >= 0x30 && c <= 0x39) || // 0-9
+            (c >= 0x41 && c <= 0x5A) || // a-z
+            (c >= 0x61 && c <= 0x7A) // A-Z
+        ) {
+            out += string.charAt(i);
+            continue;
+        }
+
+        if (c < 0x80) {
+            out = out + hexTable[c];
+            continue;
+        }
+
+        if (c < 0x800) {
+            out = out + (hexTable[0xC0 | (c >> 6)] + hexTable[0x80 | (c & 0x3F)]);
+            continue;
+        }
+
+        if (c < 0xD800 || c >= 0xE000) {
+            out = out + (hexTable[0xE0 | (c >> 12)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)]);
+            continue;
+        }
+
+        i += 1;
+        c = 0x10000 + (((c & 0x3FF) << 10) | (string.charCodeAt(i) & 0x3FF));
+        out += hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)];
+    }
+
+    return out;
+};
+
+exports.compact = function (obj, references) {
+    if (typeof obj !== 'object' || obj === null) {
+        return obj;
+    }
+
+    var refs = references || [];
+    var lookup = refs.indexOf(obj);
+    if (lookup !== -1) {
+        return refs[lookup];
+    }
+
+    refs.push(obj);
+
+    if (Array.isArray(obj)) {
+        var compacted = [];
+
+        for (var i = 0; i < obj.length; ++i) {
+            if (obj[i] && typeof obj[i] === 'object') {
+                compacted.push(exports.compact(obj[i], refs));
+            } else if (typeof obj[i] !== 'undefined') {
+                compacted.push(obj[i]);
+            }
+        }
+
+        return compacted;
+    }
+
+    var keys = Object.keys(obj);
+    for (var j = 0; j < keys.length; ++j) {
+        var key = keys[j];
+        obj[key] = exports.compact(obj[key], refs);
+    }
+
+    return obj;
+};
+
+exports.isRegExp = function (obj) {
+    return Object.prototype.toString.call(obj) === '[object RegExp]';
+};
+
+exports.isBuffer = function (obj) {
+    if (obj === null || typeof obj === 'undefined') {
+        return false;
+    }
+
+    return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+};
+
+},{}],235:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -48618,7 +49114,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],232:[function(require,module,exports){
+},{}],236:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -48705,13 +49201,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],233:[function(require,module,exports){
+},{}],237:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":231,"./encode":232}],234:[function(require,module,exports){
+},{"./decode":235,"./encode":236}],238:[function(require,module,exports){
 (function (process,global,Buffer){
 'use strict'
 
@@ -48751,10 +49247,10 @@ function randomBytes (size, cb) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"_process":222,"buffer":67}],235:[function(require,module,exports){
+},{"_process":222,"buffer":67}],239:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":236}],236:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":240}],240:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -48830,7 +49326,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":238,"./_stream_writable":240,"core-util-is":72,"inherits":161,"process-nextick-args":221}],237:[function(require,module,exports){
+},{"./_stream_readable":242,"./_stream_writable":244,"core-util-is":72,"inherits":161,"process-nextick-args":221}],241:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -48857,7 +49353,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":239,"core-util-is":72,"inherits":161}],238:[function(require,module,exports){
+},{"./_stream_transform":243,"core-util-is":72,"inherits":161}],242:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -49740,7 +50236,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":236,"_process":222,"buffer":67,"core-util-is":72,"events":112,"inherits":161,"isarray":167,"process-nextick-args":221,"string_decoder/":309,"util":36}],239:[function(require,module,exports){
+},{"./_stream_duplex":240,"_process":222,"buffer":67,"core-util-is":72,"events":112,"inherits":161,"isarray":167,"process-nextick-args":221,"string_decoder/":309,"util":36}],243:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -49921,7 +50417,7 @@ function done(stream, er) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":236,"core-util-is":72,"inherits":161}],240:[function(require,module,exports){
+},{"./_stream_duplex":240,"core-util-is":72,"inherits":161}],244:[function(require,module,exports){
 (function (process){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
@@ -50440,10 +50936,10 @@ function CorkedRequest(state) {
   };
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":236,"_process":222,"buffer":67,"core-util-is":72,"events":112,"inherits":161,"process-nextick-args":221,"util-deprecate":370}],241:[function(require,module,exports){
+},{"./_stream_duplex":240,"_process":222,"buffer":67,"core-util-is":72,"events":112,"inherits":161,"process-nextick-args":221,"util-deprecate":370}],245:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":237}],242:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":241}],246:[function(require,module,exports){
 var Stream = (function (){
   try {
     return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
@@ -50457,13 +50953,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":236,"./lib/_stream_passthrough.js":237,"./lib/_stream_readable.js":238,"./lib/_stream_transform.js":239,"./lib/_stream_writable.js":240}],243:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":240,"./lib/_stream_passthrough.js":241,"./lib/_stream_readable.js":242,"./lib/_stream_transform.js":243,"./lib/_stream_writable.js":244}],247:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":239}],244:[function(require,module,exports){
+},{"./lib/_stream_transform.js":243}],248:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":240}],245:[function(require,module,exports){
+},{"./lib/_stream_writable.js":244}],249:[function(require,module,exports){
 // Copyright 2010-2012 Mikeal Rogers
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
@@ -50622,7 +51118,7 @@ Object.defineProperty(request, 'debug', {
   }
 })
 
-},{"./lib/cookies":247,"./lib/helpers":250,"./request":260,"extend":114}],246:[function(require,module,exports){
+},{"./lib/cookies":251,"./lib/helpers":254,"./request":260,"extend":114}],250:[function(require,module,exports){
 'use strict'
 
 var caseless = require('caseless')
@@ -50792,7 +51288,7 @@ Auth.prototype.onResponse = function (response) {
 
 exports.Auth = Auth
 
-},{"./helpers":250,"caseless":69,"node-uuid":197}],247:[function(require,module,exports){
+},{"./helpers":254,"caseless":69,"node-uuid":197}],251:[function(require,module,exports){
 'use strict'
 
 var tough = require('tough-cookie')
@@ -50833,7 +51329,7 @@ exports.jar = function(store) {
   return new RequestJar(store)
 }
 
-},{"tough-cookie":312}],248:[function(require,module,exports){
+},{"tough-cookie":312}],252:[function(require,module,exports){
 (function (process){
 'use strict'
 
@@ -50916,7 +51412,7 @@ function getProxyFromURI(uri) {
 module.exports = getProxyFromURI
 
 }).call(this,require('_process'))
-},{"_process":222}],249:[function(require,module,exports){
+},{"_process":222}],253:[function(require,module,exports){
 'use strict'
 
 var fs = require('fs')
@@ -51133,7 +51629,7 @@ Har.prototype.options = function (options) {
 
 exports.Har = Har
 
-},{"extend":114,"fs":63,"har-validator":127,"querystring":233}],250:[function(require,module,exports){
+},{"extend":114,"fs":63,"har-validator":127,"querystring":237}],254:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -51211,7 +51707,7 @@ exports.version               = version
 exports.defer                 = deferMethod()
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":222,"buffer":67,"crypto":78,"json-stringify-safe":177}],251:[function(require,module,exports){
+},{"_process":222,"buffer":67,"crypto":78,"json-stringify-safe":177}],255:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 
@@ -51327,7 +51823,7 @@ Multipart.prototype.onRequest = function (options) {
 exports.Multipart = Multipart
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":67,"combined-stream":71,"isstream":168,"node-uuid":197}],252:[function(require,module,exports){
+},{"buffer":67,"combined-stream":71,"isstream":168,"node-uuid":197}],256:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 
@@ -51478,7 +51974,7 @@ OAuth.prototype.onRequest = function (_oauth) {
 exports.OAuth = OAuth
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":67,"caseless":69,"crypto":78,"node-uuid":197,"oauth-sign":198,"qs":256,"url":368}],253:[function(require,module,exports){
+},{"buffer":67,"caseless":69,"crypto":78,"node-uuid":197,"oauth-sign":198,"qs":231,"url":368}],257:[function(require,module,exports){
 'use strict'
 
 var qs = require('qs')
@@ -51531,7 +52027,7 @@ Querystring.prototype.unescape = querystring.unescape
 
 exports.Querystring = Querystring
 
-},{"qs":256,"querystring":233}],254:[function(require,module,exports){
+},{"qs":231,"querystring":237}],258:[function(require,module,exports){
 'use strict'
 
 var url = require('url')
@@ -51686,7 +52182,7 @@ Redirect.prototype.onResponse = function (response) {
 
 exports.Redirect = Redirect
 
-},{"url":368}],255:[function(require,module,exports){
+},{"url":368}],259:[function(require,module,exports){
 'use strict'
 
 var url = require('url')
@@ -51864,496 +52360,7 @@ Tunnel.defaultProxyHeaderWhiteList = defaultProxyHeaderWhiteList
 Tunnel.defaultProxyHeaderExclusiveList = defaultProxyHeaderExclusiveList
 exports.Tunnel = Tunnel
 
-},{"tunnel-agent":319,"url":368}],256:[function(require,module,exports){
-'use strict';
-
-var Stringify = require('./stringify');
-var Parse = require('./parse');
-
-module.exports = {
-    stringify: Stringify,
-    parse: Parse
-};
-
-},{"./parse":257,"./stringify":258}],257:[function(require,module,exports){
-'use strict';
-
-var Utils = require('./utils');
-
-var has = Object.prototype.hasOwnProperty;
-
-var defaults = {
-    delimiter: '&',
-    depth: 5,
-    arrayLimit: 20,
-    parameterLimit: 1000,
-    strictNullHandling: false,
-    plainObjects: false,
-    allowPrototypes: false,
-    allowDots: false,
-    decoder: Utils.decode
-};
-
-var parseValues = function parseValues(str, options) {
-    var obj = {};
-    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
-
-    for (var i = 0; i < parts.length; ++i) {
-        var part = parts[i];
-        var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
-
-        var key, val;
-        if (pos === -1) {
-            key = options.decoder(part);
-            val = options.strictNullHandling ? null : '';
-        } else {
-            key = options.decoder(part.slice(0, pos));
-            val = options.decoder(part.slice(pos + 1));
-        }
-        if (has.call(obj, key)) {
-            obj[key] = [].concat(obj[key]).concat(val);
-        } else {
-            obj[key] = val;
-        }
-    }
-
-    return obj;
-};
-
-var parseObject = function parseObject(chain, val, options) {
-    if (!chain.length) {
-        return val;
-    }
-
-    var root = chain.shift();
-
-    var obj;
-    if (root === '[]') {
-        obj = [];
-        obj = obj.concat(parseObject(chain, val, options));
-    } else {
-        obj = options.plainObjects ? Object.create(null) : {};
-        var cleanRoot = root.charAt(0) === '[' && root.charAt(root.length - 1) === ']' ? root.slice(1, -1) : root;
-        var index = parseInt(cleanRoot, 10);
-        if (
-            !isNaN(index) &&
-            root !== cleanRoot &&
-            String(index) === cleanRoot &&
-            index >= 0 &&
-            (options.parseArrays && index <= options.arrayLimit)
-        ) {
-            obj = [];
-            obj[index] = parseObject(chain, val, options);
-        } else {
-            obj[cleanRoot] = parseObject(chain, val, options);
-        }
-    }
-
-    return obj;
-};
-
-var parseKeys = function parseKeys(givenKey, val, options) {
-    if (!givenKey) {
-        return;
-    }
-
-    // Transform dot notation to bracket notation
-    var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, '[$1]') : givenKey;
-
-    // The regex chunks
-
-    var brackets = /(\[[^[\]]*])/;
-    var child = /(\[[^[\]]*])/g;
-
-    // Get the parent
-
-    var segment = brackets.exec(key);
-    var parent = segment ? key.slice(0, segment.index) : key;
-
-    // Stash the parent if it exists
-
-    var keys = [];
-    if (parent) {
-        // If we aren't using plain objects, optionally prefix keys
-        // that would overwrite object prototype properties
-        if (!options.plainObjects && has.call(Object.prototype, parent)) {
-            if (!options.allowPrototypes) {
-                return;
-            }
-        }
-
-        keys.push(parent);
-    }
-
-    // Loop through children appending to the array until we hit depth
-
-    var i = 0;
-    while ((segment = child.exec(key)) !== null && i < options.depth) {
-        i += 1;
-        if (!options.plainObjects && has.call(Object.prototype, segment[1].slice(1, -1))) {
-            if (!options.allowPrototypes) {
-                return;
-            }
-        }
-        keys.push(segment[1]);
-    }
-
-    // If there's a remainder, just add whatever is left
-
-    if (segment) {
-        keys.push('[' + key.slice(segment.index) + ']');
-    }
-
-    return parseObject(keys, val, options);
-};
-
-module.exports = function (str, opts) {
-    var options = opts || {};
-
-    if (options.decoder !== null && options.decoder !== undefined && typeof options.decoder !== 'function') {
-        throw new TypeError('Decoder has to be a function.');
-    }
-
-    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : defaults.delimiter;
-    options.depth = typeof options.depth === 'number' ? options.depth : defaults.depth;
-    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : defaults.arrayLimit;
-    options.parseArrays = options.parseArrays !== false;
-    options.decoder = typeof options.decoder === 'function' ? options.decoder : defaults.decoder;
-    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : defaults.allowDots;
-    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : defaults.plainObjects;
-    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : defaults.allowPrototypes;
-    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : defaults.parameterLimit;
-    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
-
-    if (str === '' || str === null || typeof str === 'undefined') {
-        return options.plainObjects ? Object.create(null) : {};
-    }
-
-    var tempObj = typeof str === 'string' ? parseValues(str, options) : str;
-    var obj = options.plainObjects ? Object.create(null) : {};
-
-    // Iterate over the keys and setup the new object
-
-    var keys = Object.keys(tempObj);
-    for (var i = 0; i < keys.length; ++i) {
-        var key = keys[i];
-        var newObj = parseKeys(key, tempObj[key], options);
-        obj = Utils.merge(obj, newObj, options);
-    }
-
-    return Utils.compact(obj);
-};
-
-},{"./utils":259}],258:[function(require,module,exports){
-'use strict';
-
-var Utils = require('./utils');
-
-var arrayPrefixGenerators = {
-    brackets: function brackets(prefix) {
-        return prefix + '[]';
-    },
-    indices: function indices(prefix, key) {
-        return prefix + '[' + key + ']';
-    },
-    repeat: function repeat(prefix) {
-        return prefix;
-    }
-};
-
-var defaults = {
-    delimiter: '&',
-    strictNullHandling: false,
-    skipNulls: false,
-    encode: true,
-    encoder: Utils.encode
-};
-
-var stringify = function stringify(object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots) {
-    var obj = object;
-    if (typeof filter === 'function') {
-        obj = filter(prefix, obj);
-    } else if (obj instanceof Date) {
-        obj = obj.toISOString();
-    } else if (obj === null) {
-        if (strictNullHandling) {
-            return encoder ? encoder(prefix) : prefix;
-        }
-
-        obj = '';
-    }
-
-    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean' || Utils.isBuffer(obj)) {
-        if (encoder) {
-            return [encoder(prefix) + '=' + encoder(obj)];
-        }
-        return [prefix + '=' + String(obj)];
-    }
-
-    var values = [];
-
-    if (typeof obj === 'undefined') {
-        return values;
-    }
-
-    var objKeys;
-    if (Array.isArray(filter)) {
-        objKeys = filter;
-    } else {
-        var keys = Object.keys(obj);
-        objKeys = sort ? keys.sort(sort) : keys;
-    }
-
-    for (var i = 0; i < objKeys.length; ++i) {
-        var key = objKeys[i];
-
-        if (skipNulls && obj[key] === null) {
-            continue;
-        }
-
-        if (Array.isArray(obj)) {
-            values = values.concat(stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
-        } else {
-            values = values.concat(stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
-        }
-    }
-
-    return values;
-};
-
-module.exports = function (object, opts) {
-    var obj = object;
-    var options = opts || {};
-    var delimiter = typeof options.delimiter === 'undefined' ? defaults.delimiter : options.delimiter;
-    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
-    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : defaults.skipNulls;
-    var encode = typeof options.encode === 'boolean' ? options.encode : defaults.encode;
-    var encoder = encode ? (typeof options.encoder === 'function' ? options.encoder : defaults.encoder) : null;
-    var sort = typeof options.sort === 'function' ? options.sort : null;
-    var allowDots = typeof options.allowDots === 'undefined' ? false : options.allowDots;
-    var objKeys;
-    var filter;
-
-    if (options.encoder !== null && options.encoder !== undefined && typeof options.encoder !== 'function') {
-        throw new TypeError('Encoder has to be a function.');
-    }
-
-    if (typeof options.filter === 'function') {
-        filter = options.filter;
-        obj = filter('', obj);
-    } else if (Array.isArray(options.filter)) {
-        objKeys = filter = options.filter;
-    }
-
-    var keys = [];
-
-    if (typeof obj !== 'object' || obj === null) {
-        return '';
-    }
-
-    var arrayFormat;
-    if (options.arrayFormat in arrayPrefixGenerators) {
-        arrayFormat = options.arrayFormat;
-    } else if ('indices' in options) {
-        arrayFormat = options.indices ? 'indices' : 'repeat';
-    } else {
-        arrayFormat = 'indices';
-    }
-
-    var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
-
-    if (!objKeys) {
-        objKeys = Object.keys(obj);
-    }
-
-    if (sort) {
-        objKeys.sort(sort);
-    }
-
-    for (var i = 0; i < objKeys.length; ++i) {
-        var key = objKeys[i];
-
-        if (skipNulls && obj[key] === null) {
-            continue;
-        }
-
-        keys = keys.concat(stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
-    }
-
-    return keys.join(delimiter);
-};
-
-},{"./utils":259}],259:[function(require,module,exports){
-'use strict';
-
-var hexTable = (function () {
-    var array = new Array(256);
-    for (var i = 0; i < 256; ++i) {
-        array[i] = '%' + ((i < 16 ? '0' : '') + i.toString(16)).toUpperCase();
-    }
-
-    return array;
-}());
-
-var has = Object.prototype.hasOwnProperty;
-
-exports.arrayToObject = function (source, options) {
-    var obj = options.plainObjects ? Object.create(null) : {};
-    for (var i = 0; i < source.length; ++i) {
-        if (typeof source[i] !== 'undefined') {
-            obj[i] = source[i];
-        }
-    }
-
-    return obj;
-};
-
-exports.merge = function (target, source, options) {
-    if (!source) {
-        return target;
-    }
-
-    if (typeof source !== 'object') {
-        if (Array.isArray(target)) {
-            target.push(source);
-        } else if (typeof target === 'object') {
-            if (options.plainObjects || options.allowPrototypes || !has.call(Object.prototype, source)) {
-                target[source] = true;
-            }
-        } else {
-            return [target, source];
-        }
-
-        return target;
-    }
-
-    if (typeof target !== 'object') {
-        return [target].concat(source);
-    }
-
-    var mergeTarget = target;
-    if (Array.isArray(target) && !Array.isArray(source)) {
-        mergeTarget = exports.arrayToObject(target, options);
-    }
-
-    return Object.keys(source).reduce(function (acc, key) {
-        var value = source[key];
-
-        if (has.call(acc, key)) {
-            acc[key] = exports.merge(acc[key], value, options);
-        } else {
-            acc[key] = value;
-        }
-        return acc;
-    }, mergeTarget);
-};
-
-exports.decode = function (str) {
-    try {
-        return decodeURIComponent(str.replace(/\+/g, ' '));
-    } catch (e) {
-        return str;
-    }
-};
-
-exports.encode = function (str) {
-    // This code was originally written by Brian White (mscdex) for the io.js core querystring library.
-    // It has been adapted here for stricter adherence to RFC 3986
-    if (str.length === 0) {
-        return str;
-    }
-
-    var string = typeof str === 'string' ? str : String(str);
-
-    var out = '';
-    for (var i = 0; i < string.length; ++i) {
-        var c = string.charCodeAt(i);
-
-        if (
-            c === 0x2D || // -
-            c === 0x2E || // .
-            c === 0x5F || // _
-            c === 0x7E || // ~
-            (c >= 0x30 && c <= 0x39) || // 0-9
-            (c >= 0x41 && c <= 0x5A) || // a-z
-            (c >= 0x61 && c <= 0x7A) // A-Z
-        ) {
-            out += string.charAt(i);
-            continue;
-        }
-
-        if (c < 0x80) {
-            out = out + hexTable[c];
-            continue;
-        }
-
-        if (c < 0x800) {
-            out = out + (hexTable[0xC0 | (c >> 6)] + hexTable[0x80 | (c & 0x3F)]);
-            continue;
-        }
-
-        if (c < 0xD800 || c >= 0xE000) {
-            out = out + (hexTable[0xE0 | (c >> 12)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)]);
-            continue;
-        }
-
-        i += 1;
-        c = 0x10000 + (((c & 0x3FF) << 10) | (string.charCodeAt(i) & 0x3FF));
-        out += hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)];
-    }
-
-    return out;
-};
-
-exports.compact = function (obj, references) {
-    if (typeof obj !== 'object' || obj === null) {
-        return obj;
-    }
-
-    var refs = references || [];
-    var lookup = refs.indexOf(obj);
-    if (lookup !== -1) {
-        return refs[lookup];
-    }
-
-    refs.push(obj);
-
-    if (Array.isArray(obj)) {
-        var compacted = [];
-
-        for (var i = 0; i < obj.length; ++i) {
-            if (obj[i] && typeof obj[i] === 'object') {
-                compacted.push(exports.compact(obj[i], refs));
-            } else if (typeof obj[i] !== 'undefined') {
-                compacted.push(obj[i]);
-            }
-        }
-
-        return compacted;
-    }
-
-    var keys = Object.keys(obj);
-    for (var j = 0; j < keys.length; ++j) {
-        var key = keys[j];
-        obj[key] = exports.compact(obj[key], refs);
-    }
-
-    return obj;
-};
-
-exports.isRegExp = function (obj) {
-    return Object.prototype.toString.call(obj) === '[object RegExp]';
-};
-
-exports.isBuffer = function (obj) {
-    if (obj === null || typeof obj === 'undefined') {
-        return false;
-    }
-
-    return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
-};
-
-},{}],260:[function(require,module,exports){
+},{"tunnel-agent":319,"url":368}],260:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -53791,7 +53798,7 @@ Request.prototype.toJSON = requestToJSON
 module.exports = Request
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./lib/auth":246,"./lib/cookies":247,"./lib/getProxyFromURI":248,"./lib/har":249,"./lib/helpers":250,"./lib/multipart":251,"./lib/oauth":252,"./lib/querystring":253,"./lib/redirect":254,"./lib/tunnel":255,"_process":222,"aws-sign2":25,"aws4":26,"bl":33,"buffer":67,"caseless":69,"extend":114,"forever-agent":122,"form-data":123,"hawk":151,"http":297,"http-signature":153,"https":158,"is-typedarray":166,"isstream":168,"mime-types":193,"stream":296,"stringstream":310,"url":368,"util":373,"zlib":62}],261:[function(require,module,exports){
+},{"./lib/auth":250,"./lib/cookies":251,"./lib/getProxyFromURI":252,"./lib/har":253,"./lib/helpers":254,"./lib/multipart":255,"./lib/oauth":256,"./lib/querystring":257,"./lib/redirect":258,"./lib/tunnel":259,"_process":222,"aws-sign2":25,"aws4":26,"bl":33,"buffer":67,"caseless":69,"extend":114,"forever-agent":122,"form-data":123,"hawk":151,"http":297,"http-signature":153,"https":158,"is-typedarray":166,"isstream":168,"mime-types":193,"stream":296,"stringstream":310,"url":368,"util":373,"zlib":62}],261:[function(require,module,exports){
 (function (Buffer){
 /*
 CryptoJS v3.1.2
@@ -60419,7 +60426,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":112,"inherits":161,"readable-stream/duplex.js":235,"readable-stream/passthrough.js":241,"readable-stream/readable.js":242,"readable-stream/transform.js":243,"readable-stream/writable.js":244}],297:[function(require,module,exports){
+},{"events":112,"inherits":161,"readable-stream/duplex.js":239,"readable-stream/passthrough.js":245,"readable-stream/readable.js":246,"readable-stream/transform.js":247,"readable-stream/writable.js":248}],297:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
@@ -61059,10 +61066,10 @@ IncomingMessage.prototype._onXHRProgress = function () {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
 },{"./capability":298,"_process":222,"buffer":67,"inherits":161,"readable-stream":307}],301:[function(require,module,exports){
-arguments[4][236][0].apply(exports,arguments)
-},{"./_stream_readable":303,"./_stream_writable":305,"core-util-is":72,"dup":236,"inherits":161,"process-nextick-args":221}],302:[function(require,module,exports){
-arguments[4][237][0].apply(exports,arguments)
-},{"./_stream_transform":304,"core-util-is":72,"dup":237,"inherits":161}],303:[function(require,module,exports){
+arguments[4][240][0].apply(exports,arguments)
+},{"./_stream_readable":303,"./_stream_writable":305,"core-util-is":72,"dup":240,"inherits":161,"process-nextick-args":221}],302:[function(require,module,exports){
+arguments[4][241][0].apply(exports,arguments)
+},{"./_stream_transform":304,"core-util-is":72,"dup":241,"inherits":161}],303:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -65060,7 +65067,7 @@ module.exports={
         "spec": ">=2.3.0 <2.4.0",
         "type": "range"
       },
-      "/Users/abdul/WearHacksKW2017/node_modules/request"
+      "/Users/veljkodimic/Documents/WearHacksKW2017/node_modules/request"
     ]
   ],
   "_from": "tough-cookie@>=2.3.0 <2.4.0",
@@ -65094,7 +65101,7 @@ module.exports={
   "_shasum": "f081f76e4c85720e6c37a5faced737150d84072a",
   "_shrinkwrap": null,
   "_spec": "tough-cookie@~2.3.0",
-  "_where": "/Users/abdul/WearHacksKW2017/node_modules/request",
+  "_where": "/Users/veljkodimic/Documents/WearHacksKW2017/node_modules/request",
   "author": {
     "name": "Jeremy Stashewsky",
     "email": "jstashewsky@salesforce.com"
@@ -68103,7 +68110,7 @@ Capability.prototype.generate = function(timeout) {
 
 module.exports = Capability;
 
-},{"./utils":364,"jsonwebtoken":179,"querystring":233}],323:[function(require,module,exports){
+},{"./utils":364,"jsonwebtoken":179,"querystring":237}],323:[function(require,module,exports){
 (function (process){
 //Dependencies
 var Q = require('q');
@@ -68279,7 +68286,7 @@ Client.prototype.request = function (options, callback) {
 module.exports = Client;
 
 }).call(this,require('_process'))
-},{"../package.json":366,"_process":222,"q":230,"querystring":233,"request":245,"underscore":367}],324:[function(require,module,exports){
+},{"../package.json":366,"_process":222,"q":230,"querystring":237,"request":249,"underscore":367}],324:[function(require,module,exports){
 /**
  @module IpMessagingClient
 
@@ -70540,7 +70547,7 @@ module.exports={
         "spec": ">=2.11.1 <3.0.0",
         "type": "range"
       },
-      "/Users/abdul/WearHacksKW2017"
+      "/Users/veljkodimic/Documents/WearHacksKW2017"
     ]
   ],
   "_from": "twilio@>=2.11.1 <3.0.0",
@@ -70574,7 +70581,7 @@ module.exports={
   "_shasum": "451099467313c56b3767994df2d19062f10ef8c4",
   "_shrinkwrap": null,
   "_spec": "twilio@^2.11.1",
-  "_where": "/Users/abdul/WearHacksKW2017",
+  "_where": "/Users/veljkodimic/Documents/WearHacksKW2017",
   "author": {
     "name": "Kevin Whinnery",
     "email": "kevin.whinnery@gmail.com"
@@ -72937,7 +72944,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":369,"punycode":229,"querystring":233}],369:[function(require,module,exports){
+},{"./util":369,"punycode":229,"querystring":237}],369:[function(require,module,exports){
 'use strict';
 
 module.exports = {

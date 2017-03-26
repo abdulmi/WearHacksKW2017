@@ -1,4 +1,6 @@
 var firebase = require('firebase')
+var text = require('../texting/text.js')
+
 var config = {
    apiKey: "AIzaSyCVMbpAX0ocPFzff3hIoyoJ909w6CkFB_Q",
    authDomain: "wearhackskw2017-51c15.firebaseapp.com",
@@ -216,7 +218,7 @@ function sendMessage(perscription, perscriptionKey){
             console.log(pat.val())
             var message = "";
             if (perscription.Count == 0){
-                message += "This is your doctor's office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
+                // message += "This is your doctor office here to remind you to take your " + perscription.Name + " " + perscription.Schedule.Frequency + " time(s) a day. \n" + perscription.Detail + "\nFor any further questions, please text or call 510-555-1837.\n";
             }
             message += "Hi " + pat.val().Name + "! It is time to take your " + perscription.Name + ".";
             getPhoneNumber(perscription.PatientID, function(number){

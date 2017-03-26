@@ -50,7 +50,7 @@ var savePatient = function(){
 }
 
 var savePrescription = function(){
-  for(var i = 0; i < a; i++){
+ // for(var i = 0; i < a; i++){
     var prescriptionName = document.getElementById('addNewPrescriptionName_'+a).value;
     var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_'+a).value;
     var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_'+a).value;
@@ -63,7 +63,7 @@ var savePrescription = function(){
     var minutes = parseInt(selectedHourValue) * 60 + parseInt(selectedMinuteValue);
     var pSchedule = db.schedule(prescriptionDosage, prescriptionDuration, minutes);
     db.createPerscription(selectedPatientID, prescriptionName, prescriptionDetail, pSchedule);
-  }
+ // }
 }
   $("#btnAddSubscription").on('click', function(){
     $('#prescription-container').append(enterNewPrescription());
@@ -125,11 +125,12 @@ var savePrescription = function(){
   $('#existingPatientList').on('click', 'li', function(events){
     // alert($(this).val());
     selectedPatientID = $(this).val();
+    console.log("selected patient id: " + selectedPatientID);
 
     //update patient name
-    console.log(selectedPatientID);
 
     db.getPatientName(selectedPatientID, function(data){
+      console.log("patient name is retrieved as : " + data)
       $('#existingPatientName').val(data);
     });
 
@@ -148,11 +149,9 @@ var savePrescription = function(){
     db.getAllPerscriptionsSnap(function(data){
       data.forEach(function(childSnapshot){
         var id = childSnapshot.child('PatientID').val();
-        if(selectedPatientID === id) {
-          console.log(childSnapshot.key);
+        if(selectedPatientID == id) {
           var name = childSnapshot.child('Name').val();
           var listItem = $('<li class="list-group-item" value="'+childSnapshot.key+'"></li>').text(name);
-          console.log(listItem)
           $('#prescriptionList').append(listItem);
         }
       });
