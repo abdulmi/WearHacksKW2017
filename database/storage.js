@@ -126,8 +126,8 @@ function getPatient(id, callback){
 
 function getPerscription(id, callback){
     perscriptions.child(id).once("value").then(function(snapshot){
-        if (snapshot.val()){
-            callback(snapshot.val());
+        if (snapshot){
+            callback(snapshot);
         }
         else{
             callback();

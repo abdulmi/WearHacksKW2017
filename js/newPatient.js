@@ -2,6 +2,7 @@ $(document).ready(function(){
 // var db = require('../database/storage.js');
 var a = 0;
 
+
 var enterNewPrescription = function(){
   a++;
   var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
@@ -34,6 +35,33 @@ var enterNewPrescription = function(){
   // $('#prescription-container').append(prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter);
 
 };
+var savePatient = function(){
+  console.log("save");
+  var name = document.getElementById('inputPatientName').value;
+  var id = document.getElementById('inputPatientID').value;
+  var phone = document.getElementById('inputPatientPhone').value;
+  var age = document.getElementById('inputPatientAge').value;
+  var method = document.getElementById('inputPatientMethod').value;
+  createPatient(id, name, phone, age, method);
+}
+
+var selectedPatientID;
+var savePrescription = function(){
+  for(var i = 0; i < a; i++){
+    var prescriptionName = document.getElementById('addNewPrescriptionName_'+a).value;
+    var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_'+a).value;
+    var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_'+a).value;
+    var prescriptionDuration = document.getElementById('addNewPrescriptionDuration_'+a).value;
+    var selectedHour = document.getElementById('addNewPrescriptionStartTimeHour_'+a);
+    var selectedHourValue = selectedHour.options[selectedHour.selectedIndex].value;
+    var selectedMinute = document.getElementById('addNewPrescriptionStartTimeMinute_'+a);
+    var selectedMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
+
+    var minutes = selectedHourValue * 60 + selectedMinuteValue;
+    var pSchedule = schedule(prescriptionDosage, prescriptionDuration, minutes);
+    createPerscription(selectedPatientID, prescriptionName, prescriptionDetail, pSchedule);
+  }
+}
   $("#btnAddSubscription").on('click', function(){
     $('#prescription-container').append(enterNewPrescription());
   });
@@ -49,36 +77,9 @@ var enterNewPrescription = function(){
     $('#existing-prescription-container').append(enterNewPrescription());
   });
 
-  $("#btnSaveNewPatient").on('click', function(events){
-    console.log("save");
-    var name = document.getElementById('inputPatientName').value;
-    var id = document.getElementById('inputPatientID').value;
-    var phone = document.getElementById('inputPatientPhone').value;
-    var age = document.getElementById('inputPatientAge').value;
-    var method = document.getElementById('inputPatientMethod').value;
-    createPatient(id, name, phone, age, method);
+  $("#btnSaveNewPatient").on('click', savePrescription);
 
-    for(var i = 0; i < a; i++){
-      var prescriptionName = document.getElementById('addNewPrescriptionName_'+a).value;
-      var prescriptionDetail = document.getElementById('addNewPrescriptionDetails_'+a).value;
-      var prescriptionDosage = document.getElementById('addNewPrescriptionDosage_'+a).value;
-      var prescriptionDuration = document.getElementById('addNewPrescriptionDuration_'+a).value;
-      var selectedHour = document.getElementById('addNewPrescriptionStartTimeHour_'+a);
-      var selectedHourValue = selectedHour.options[selectedHour.selectedIndex].value;
-      var selectedMinute = document.getElementById('addNewPrescriptionStartTimeMinute_'+a);
-      var selectedMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
-
-      console.log(prescriptionDetail);
-      console.log(prescriptionName);
-      var minutes = selectedHourValue * 60 + selectedMinuteValue;
-      var pSchedule = schedule(prescriptionDosage, prescriptionDuration, minutes);
-      createPerscription(id, prescriptionName, prescriptionDetail, pSchedule);
-
-    }
-
-
-
-  });
+  $('#btnSaveNewPrescription').on('click', savePrescription);
 
   $('#aExistingPatientModal').on('click', function(events){
 
@@ -96,24 +97,29 @@ var enterNewPrescription = function(){
 
   $('#existingPatientList').on('click', 'li', function(events){
     // alert($(this).val());
-    var patientID = $(this).val();
+    selectedPatientID = $(this).val();
 
     //update patient name
-    console.log(patientID);
+    console.log(selectedPatientID);
 
-    getPatientName(patientID, function(data){
+    getPatientName(selectedPatientID, function(data){
       $('#existingPatientName').val(data);
     });
 
     //update patient age
-    getPhoneNumber(patientID, function(data){
+    getPhoneNumber(selectedPatientID, function(data){
       $('#existingPatientPhone').val(data);
     });
 
     //update patient phone number
-    getPatient(patientID, function(data){
-      console.log(data);
+    getPatient(selectedPatientID, function(data){
       $('#existingPatientAge').val(data.child('Age').val());
+    });
+
+    //update perscription list
+    $('#prescriptionList').empty();
+    getPerscription(selectedPatientID, function(data){
+      console.log(data.child('Name').val());
     });
 
   })
