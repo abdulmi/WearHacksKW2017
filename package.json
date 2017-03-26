@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node texting/server.js",
-    "build": "browserify script.js -t babelify --outfile bundle.js",
     "run": "serve .",
+    "start": "npm run build && node texting/server.js",
+    "build": "browserify script.js -t babelify --outfile bundle.js",
     "watch": "nodemon --exec 'npm run build'"
   },
   "repository": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/dougouk/WearHacksKW2017#readme",
   "dependencies": {
+    "express": "^4.15.2",
     "firebase": "^3.7.3",
     "twilio": "^2.11.1"
   },
