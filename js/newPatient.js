@@ -5,7 +5,7 @@ var a = 0;
 
 var enterNewPrescription = function(){
   a++;
-  var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
+  var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription'+'" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
   var prescriptionNameForm = '<form><label for="inputlg">Prescription Name</label> <input class="form-control input-lg" id="addNewPrescriptionName_' + a + '" type="text"/> </form>';
   var prescriptionDetailForm = '<form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" id="addNewPrescriptionDetails_' + a + '" type="text"/>    </form>';
   var prescriptionFooter = ' </div> </div>';
@@ -71,6 +71,12 @@ var savePrescription = function(){
     console.log("removed");
     a--;
     console.log(a);
+  });
+
+  $("#existing-prescription-container").on('click', '#btnRemovePrescription', function(events) {
+    $(this).closest('div').remove();
+    console.log("removed");
+    a--;
   });
 
   $('#btnAddSubscription-existing').on('click', function(){
