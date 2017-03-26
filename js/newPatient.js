@@ -1,37 +1,41 @@
 $(document).ready(function(){
 // var db = require('../database/storage.js');
 var a = 0;
-  $("#btnAddSubscription").on('click', function(events) {
 
-    a++;
-    var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
-    var prescriptionNameForm = '<form><label for="inputlg">Prescription Name</label> <input class="form-control input-lg" id="addNewPrescriptionName_' + a + '" type="text"/> </form>';
-    var prescriptionDetailForm = '<form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" id="addNewPrescriptionDetails_' + a + '" type="text"/>    </form>';
-    var prescriptionFooter = ' </div> </div>';
-    var textDosage = '<label for="inputlg">Dosage Schedule</label>    <label for="input-sm">Frequency (per day)</label>    <input class="form-control input-lg" id="addNewPrescriptionDosage_' + a + '"type="text"/>   ';
-    textDosage += '   <label for="input-sm">Dosage Duration</label>    <input class="form-control input-lg" id="addNewPrescriptionDuration_' + a + '"type="text"/>   ';
+var enterNewPrescription = function(){
+  a++;
+  var prescriptionHeader = ' <div id="prescription-container">   <h2>Add Prescription</h2>   <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/> <div class="prescription-section"> ';
+  var prescriptionNameForm = '<form><label for="inputlg">Prescription Name</label> <input class="form-control input-lg" id="addNewPrescriptionName_' + a + '" type="text"/> </form>';
+  var prescriptionDetailForm = '<form>      <label for="inputlg">Details</label>      <input class="form-control input-lg" id="addNewPrescriptionDetails_' + a + '" type="text"/>    </form>';
+  var prescriptionFooter = ' </div> </div>';
+  var textDosage = '<label for="inputlg">Dosage Schedule</label>    <label for="input-sm">Frequency (per day)</label>    <input class="form-control input-lg" id="addNewPrescriptionDosage_' + a + '"type="text"/>   ';
+  textDosage += '   <label for="input-sm">Dosage Duration</label>    <input class="form-control input-lg" id="addNewPrescriptionDuration_' + a + '"type="text"/>   ';
 
-    textDosage += '<label for="input-sm">Start time</label> <select class="hour input-lg" id="addNewPrescriptionStartTimeHour_'+ a + '" style="width: auto;">';
-    for(var i = 0; i <= 9; i++){
-      textDosage += "<option value=" + i + ">0" + i + "</option>";
-    }
-    for(var i = 10; i <=23; i++){
-      textDosage += "<option value=" + i + ">" + i + "</option>";
-    }
-    textDosage += "</select>";
-    textDosage += ":";
-    textDosage += '<select class="minutes input-lg" id="addNewPrescriptionStartTimeMinute_'+ a + '"style="width: auto;">'
-    for(var i = 0; i <= 9; i++){
-      textDosage += "<option value=" + i + ">0" + i + "</option>";
-    }
-    for(var i = 10; i <=59; i++){
-      textDosage += "<option value=" + i + ">" + i + "</option>";
-    }
-    textDosage += "</select>"
-    textDosage += "</form>"
-    $('#prescription-container').append(prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter);
+  textDosage += '<label for="input-sm">Start time</label> <select class="hour input-lg" id="addNewPrescriptionStartTimeHour_'+ a + '" style="width: auto;">';
+  for(var i = 0; i <= 9; i++){
+    textDosage += "<option value=" + i + ">0" + i + "</option>";
+  }
+  for(var i = 10; i <=23; i++){
+    textDosage += "<option value=" + i + ">" + i + "</option>";
+  }
+  textDosage += "</select>";
+  textDosage += ":";
+  textDosage += '<select class="minutes input-lg" id="addNewPrescriptionStartTimeMinute_'+ a + '"style="width: auto;">'
+  for(var i = 0; i <= 9; i++){
+    textDosage += "<option value=" + i + ">0" + i + "</option>";
+  }
+  for(var i = 10; i <=59; i++){
+    textDosage += "<option value=" + i + ">" + i + "</option>";
+  }
+  textDosage += "</select>"
+  textDosage += "</form>"
 
-      console.log(a);
+  return prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter;
+  // $('#prescription-container').append(prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter);
+
+};
+  $("#btnAddSubscription").on('click', function(){
+    $('#prescription-container').append(enterNewPrescription());
   });
 
   $("#prescription-container").on('click', '#btnRemovePrescription', function(events) {
@@ -39,6 +43,10 @@ var a = 0;
     console.log("removed");
     a--;
     console.log(a);
+  });
+
+  $('#btnAddSubscription-existing').on('click', function(){
+    $('#existing-prescription-container').append(enterNewPrescription());
   });
 
   $("#btnSaveNewPatient").on('click', function(events){
