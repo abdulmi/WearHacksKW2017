@@ -31,11 +31,17 @@
 
 <body id="page-top" class="index full">
   <div class="page-header" id="mNavBar">
-    <div class="row col-lg-12">
-      <h1>Safescription</h1>
-      <img class="img-responsive" src="res/logo.png"/>
-    </div>
-  </div><!--Page Header -->
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-3">
+          <img class="img-responsive" src="res/logo.png" style="height:110px"/>
+        </div>
+        <div class="col-sm-3">
+          <h1 class="center-block bd-title" style="font-size:8rem">Safescription</h1>
+        </div>
+      </div><!--row-->
+    </div><!--Page Header -->
+  </div>
 
     <div class="container">
       <div class="row">
@@ -137,7 +143,14 @@
             <h4 class="modal-title">Success!</h4>
           </div>
           <div class="modal-body">
-            <p>New patient has been successfully added to the database</p>
+            <div class="row">
+              <div class="col-sm-3">
+                <img src="res/person.png" style="height:40px"/>
+              </div>
+              <div clas="col-sm-3">
+                <p>New patient has been successfully added to the database</p>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -227,7 +240,7 @@
                             <br>
                             <div class="row">
                               <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i>Close</button>
-                              <button type="button" class="btn btn-default" id="btnSaveNewPrescription"><i class="fa fa-times"></i> Save</button>
+                              <button type="button" class="btn btn-default" id="btnSaveNewPrescription" data-toggle="modal" data-target="#modalSuccessfullySaved" data-dismiss="modal"><i class="fa fa-times"></i> Save</button>
                             </div>
                         </div>
                     </div>
