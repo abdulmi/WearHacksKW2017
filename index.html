@@ -15,6 +15,7 @@
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/patient.css" rel="stylesheet">
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -26,28 +27,25 @@
       // Initialize Firebase
     </script> -->
     <script src="https://www.gstatic.com/firebasejs/3.7.3/firebase.js"></script>
-<script src="js/firebaseAuth.js">
-  // Initialize Firebase
-
-</script>
+    <script src="js/firebaseAuth.js">  // Initialize Firebase</script>
     <script src="database/storage.js"></script>
-
-
-
 </head>
 
-<body id="page-top" class="index">
+<body id="page-top" class="index full">
+  <div class="page-header">
     <h1 class="text-center">App</h1>
+  </div><!--Page Header -->
+
     <div class="container">
       <div class="row">
-          <div class="col-lg-4">
+          <div class="col-lg-6">
                 <a href="#newPatientModal" class="portfolio-link" data-toggle="modal">
                   <img src="res/NewPatientButton.png" class="img-responsive" alt="">
                 </a>
             </input>
           </div>
-          <div class="col-lg-4">
-              <a href="#existingPatientsModal" class="portfolio-link" data-toggle="modal">
+          <div class="col-lg-6">
+              <a href="#existingPatientsModal" class="portfolio-link" id="aExistingPatientModal" data-toggle="modal">
                 <img src="res/ExistingPatientsButton.png" class="img-responsive" alt="">
               </a>
           </div>
@@ -55,8 +53,8 @@
     </div>
 
     <!-- Button modals -->
-    <div class="portfolio-modal modal fade" id="newPatientModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-content">
+    <div class="portfolio-modal modal fade col-lg-12" id="newPatientModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-content modal_opacity">
             <div class="close-modal" data-dismiss="modal">
                 <div class="lr">
                     <div class="rl">
@@ -104,126 +102,133 @@
                             <br>
 
                              <div id="prescription-container">
-                              <!-- <div class="prescription-section">
-                              <input class="modal-subButton" id="btnRemovePrescription" type="image" src="res/minus.png"/>
-                              <form>
-                                <label for="inputlg">Prescription Name</label>
-                                <input class="form-control input-lg" type="text"/>
-                              </form>
-                                <form>
-                                  <label for="inputlg">Dosage schedule</label>
-                                  <label for="input-sm">Frequency (per day)</label>
-                                  <input class="form-control input-lg" type="text"/>
-                                  <label for="input-sm">Start time</label>
-                                    <select class="hour" style="width: auto;">
-                                      <option value="0">00</option>
-                                      <option value="1">01</option>
-                                      <option value="2">02</option>
-                                      <option value="3">03</option>
-                                      <option value="4">04</option>
-                                      <option value="5">05</option>
-                                      <option value="6">06</option>
-                                      <option value="7">07</option>
-                                      <option value="8">08</option>
-                                      <option value="9">09</option>
-                                      <option value="10">10</option>
-                                      <option value="11">11</option>
-                                      <option value="12">12</option>
-                                      <option value="13">13</option>
-                                      <option value="14">14</option>
-                                      <option value="15">15</option>
-                                      <option value="16">16</option>
-                                      <option value="17">17</option>
-                                      <option value="18">18</option>
-                                      <option value="19">19</option>
-                                      <option value="20">20</option>
-                                      <option value="21">21</option>
-                                      <option value="22">22</option>
-                                      <option value="23">23</option>
-                                    </select>
-                                    :
-                                    <select class="minutes" style="width: auto;">
-                                      <option value="0">00</option>
-                                      <option value="1">01</option>
-                                      <option value="2">02</option>
-                                      <option value="3">03</option>
-                                      <option value="4">04</option>
-                                      <option value="5">05</option>
-                                      <option value="6">06</option>
-                                      <option value="7">07</option>
-                                      <option value="8">08</option>
-                                      <option value="9">09</option>
-                                      <option value="10">10</option>
-                                      <option value="11">11</option>
-                                      <option value="12">12</option>
-                                      <option value="13">13</option>
-                                      <option value="14">14</option>
-                                      <option value="15">15</option>
-                                      <option value="16">16</option>
-                                      <option value="17">17</option>
-                                      <option value="18">18</option>
-                                      <option value="19">19</option>
-                                      <option value="20">20</option>
-                                      <option value="21">21</option>
-                                      <option value="22">22</option>
-                                      <option value="23">23</option>
-                                      <option value="24">24</option>
-                                      <option value="25">25</option>
-                                      <option value="26">26</option>
-                                      <option value="27">27</option>
-                                      <option value="28">28</option>
-                                      <option value="29">29</option>
-                                      <option value="30">30</option>
-                                      <option value="31">31</option>
-                                      <option value="32">32</option>
-                                      <option value="33">33</option>
-                                      <option value="34">34</option>
-                                      <option value="35">35</option>
-                                      <option value="36">36</option>
-                                      <option value="37">37</option>
-                                      <option value="38">38</option>
-                                      <option value="39">39</option>
-                                      <option value="40">40</option>
-                                      <option value="41">41</option>
-                                      <option value="42">42</option>
-                                      <option value="43">43</option>
-                                      <option value="44">44</option>
-                                      <option value="45">45</option>
-                                      <option value="46">46</option>
-                                      <option value="47">47</option>
-                                      <option value="48">48</option>
-                                      <option value="49">49</option>
-                                      <option value="50">50</option>
-                                      <option value="51">51</option>
-                                      <option value="52">52</option>
-                                      <option value="53">53</option>
-                                      <option value="54">54</option>
-                                      <option value="55">55</option>
-                                      <option value="56">56</option>
-                                      <option value="57">57</option>
-                                      <option value="58">58</option>
-                                      <option value="59">59</option>
-                                    </select>
-
-                                </form>
-                                  <form>      <label for="inputlg">Details</label>
-                                <input class="form-control input-lg" type="text"/>
-                              </form>
-                            </div> -->
 
                             </div>
 
-                            <div class="row">
-                              <div class="col-sm-2">
-                              <label for="inputlg">Add subscription</label>
-                              </div>
-                              <div class="col-sm-2">
+                            <div class="row pull-right">
+                              <div class="col-sm-6">
                                 <input class="modal-subButton" id="btnAddSubscription" type="image" src="res/lighter plus.png"/>
                               </div>
+                              <div class="col-sm-6">
+                              <label for="inputlg">Add subscription</label>
+                              </div>
+
                             </div>
 
-                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                            <button type="button" class="btn btn-default" id="btnSaveNewPatient"><i class="fa fa-times"></i> Save</button>
+                            <br>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i>Close</button>
+                            <button type="button" class="btn btn-default" id="btnSaveNewPatient" data-toggle="modal" data-target="#modalSuccessfullySaved" data-dismiss="modal"><i class="fa fa-times"></i>Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Successfully Saved Modal -->
+    <div id="modalSuccessfullySaved" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Success!</h4>
+          </div>
+          <div class="modal-body">
+            <p>New patient has been successfully added to the database</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+<!-- Existing Patients Modal -->
+    <div class="portfolio-modal modal fade" id="existingPatientsModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-content modal_opacity">
+            <div class="close-modal" data-dismiss="modal">
+                <div class="lr">
+                    <div class="rl">
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-2">
+                        <div class="modal-body" id="new_patient">
+                            <img src="res/Person.png"/>
+                            <div class="row">
+                              <h1>Patients</h1>
+                              <hr class="star-primary">
+                            </div>
+
+
+                            <div class="row">
+                              <div class="col-lg-12">
+                                <div class="input-group">
+                                  <input type="text" class="form-control" placeholder="Search for...">
+                                  <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button">Go!</button>
+                                  </span>
+                                </div><!-- /input-group -->
+                              </div><!-- /.col-lg-6 -->
+                            </div><!-- /.row -->
+
+                            <div class=row>
+                              <div class="col-lg-5">
+
+                                <h2>List of Patients</h2>
+                                <ul class="list-group scrollable-menu" id="existingPatientList">
+                                  <li class="list-group-item">First item</li>
+                                </ul>
+
+                                <ul class="list-group scrollable-menu" id="prescriptionList">
+                                  <li class="list-group-item">First item</li>
+                                </ul>
+                              </div>
+
+                              <div class="col-lg-7">
+                                <h2>Profile Preview</h2>
+                                <div class="row">
+                                  <label>Name</label>
+                                  <!-- <h1 id="existingPatientName">Name goes here</h1> -->
+                                  <input class="form-control input-lg" type="text" id="existingPatientName"/>
+                                </div>
+                                <div class="row">
+                                  <label>Phone Number</label>
+                                  <!-- <h1 id="existingPatientPhone"></h1> -->
+                                  <input class="form-control input-lg" type="text" id="existingPatientPhone"/>
+                                </div>
+                                <div class="row">
+                                  <label>Age</label>
+                                  <!-- <h1 id="existingPatientAge"></h1> -->
+                                  <input class="form-control input-lg" type="text" id="existingPatientAge"/>
+                                </div>
+
+
+
+                                  <div id="existing-prescription-container">
+                                  </div><!--existing-prescription-container-->
+                              </div><!--col-lg-7-->
+
+                              <div class="row pull-right">
+                                <div class="col-sm-6">
+                                  <input class="modal-subButton" id="btnAddSubscription-existing" type="image" src="res/lighter plus.png"/>
+                                </div>
+                                <div class="col-sm-6">
+                                <label for="inputlg">Add subscription</label>
+                                </div>
+
+                              </div>
+
+                            <br>
+                            <div class="row">
+                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i>Close</button>
+                              <button type="button" class="btn btn-default" id="btnSaveNewPrescription"><i class="fa fa-times"></i> Save</button>
+                            </div>
                         </div>
                     </div>
                 </div>

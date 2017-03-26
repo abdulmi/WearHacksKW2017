@@ -10,7 +10,7 @@ firebase.initializeApp(config);
 var Firebase = firebase.database().ref();
 var patients = firebase.database().ref('patients');
 var perscriptions = firebase.database().ref('perscriptions');
-var twilio = require('../texting/text')
+var twilio = require('texting/text')
 
 
 
@@ -102,7 +102,7 @@ function getPatientName(id, callback){
 function getPerscriptionName(id, callback){
     perscriptions.child(id + "/Name").once("value").then(function(snapshot){
         if (snapshot.val()){
-            callback(snapshot.valI());
+            callback(snapshot.val());
         }
         else{
             callback();
@@ -112,10 +112,8 @@ function getPerscriptionName(id, callback){
 
 function getPatient(id, callback){
     patients.child(id).once("value").then(function(snapshot){
-        if(snapshot) {
-          callback(snapshot)
-        }else{
-          console.log("ERR")
+        if (snapshot){
+            callback(snapshot);
         }
         // if (snapshot.val()){
         //     callback(snapshot.val());
@@ -128,8 +126,8 @@ function getPatient(id, callback){
 
 function getPerscription(id, callback){
     perscriptions.child(id).once("value").then(function(snapshot){
-        if (snapshot.val()){
-            callback(snapshot.val());
+        if (snapshot){
+            callback(snapshot);
         }
         else{
             callback();
@@ -174,8 +172,15 @@ module.exports = {
   getAllPerscriptionsSnap: getAllPerscriptionsSnap
 }
 
+
+function getAllPatients2(callback){
+  patients.once("value").then(function(snapshot){
+    callback(snapshot);
+  });
+}
+
 function increment(perscriptionKey,count){
-    
+
 
     perscriptions.child(perscriptionKey).update({
         Count: count+1
@@ -214,4 +219,3 @@ function sendMessage(perscription, perscriptionKey){
         }
     });
 }
-
