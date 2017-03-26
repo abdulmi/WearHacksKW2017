@@ -7,7 +7,6 @@
     "start": "node texting/server.js",
     "build": "browserify script.js -t babelify --outfile bundle.js",
     "run": "serve .",
-    "watch": "nodemon --exec 'npm run build'"
   },
   "repository": {
     "type": "git",

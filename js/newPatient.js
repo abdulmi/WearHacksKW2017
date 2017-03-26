@@ -37,6 +37,7 @@ var enterNewPrescription = function(modification){
   // $('#prescription-container').append(prescriptionHeader + prescriptionNameForm + prescriptionDetailForm + textDosage + prescriptionFooter);
 
 };
+var selectedPatientID;
 var savePatient = function(){
   console.log("save");
   var name = document.getElementById('inputPatientName').value;
@@ -45,9 +46,10 @@ var savePatient = function(){
   var age = document.getElementById('inputPatientAge').value;
   var method = document.getElementById('inputPatientMethod').value;
   db.createPatient(id, name, phone, age, method);
+  selectedPatientID = id
 }
 
-var selectedPatientID;
+
 var savePrescription = function(){
   for(var i = 0; i < a; i++){
     var prescriptionName = document.getElementById('addNewPrescriptionName_'+a).value;
@@ -59,6 +61,7 @@ var savePrescription = function(){
     var selectedMinute = document.getElementById('addNewPrescriptionStartTimeMinute_'+a);
     var selectedMinuteValue = selectedHour.options[selectedHour.selectedIndex].value;
 
+    console.log("Selected min value " + selectedMinuteValue);
     var minutes = selectedHourValue * 60 + selectedMinuteValue;
     var pSchedule = db.schedule(prescriptionDosage, prescriptionDuration, minutes);
     db.createPerscription(selectedPatientID, prescriptionName, prescriptionDetail, pSchedule);
@@ -70,14 +73,12 @@ var savePrescription = function(){
 
   $("#prescription-container").on('click', '#btnRemovePrescription', function(events) {
     $(this).closest('div').remove();
-    console.log("removed");
     a--;
     console.log(a);
   });
 
   $("#existing-prescription-container").on('click', '#btnRemovePrescription', function(events) {
     $(this).closest('div').remove();
-    console.log("removed");
     a--;
   });
 
@@ -85,7 +86,12 @@ var savePrescription = function(){
     $('#existing-prescription-container').append(enterNewPrescription());
   });
 
-  $("#btnSaveNewPatient").on('click', savePrescription);
+  $("#btnSaveNewPatient").on('click', function(){
+    savePatient()
+    if(a>0){
+      savePrescription()
+    }
+  });
 
   $('#btnSaveNewPrescription').on('click', function(){
     updateProfile()
