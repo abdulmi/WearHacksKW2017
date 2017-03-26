@@ -2,7 +2,7 @@
   "name": "y",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "texting/server.js",
   "scripts": {
     "run": "serve .",
     "start": "npm run build && node texting/server.js",
