@@ -2,10 +2,10 @@
   "name": "y",
   "version": "1.0.0",
   "description": "",
-  "main": "texting/server.js",
+  "main": "index.js",
   "scripts": {
     "run": "serve .",
-    "start": "npm run build && node texting/server.js",
+    "start": "npm run build && node index.js &&node texting/server.js",
     "build": "browserify script.js -t babelify --outfile bundle.js",
     "watch": "nodemon --exec 'npm run build'"
   },
