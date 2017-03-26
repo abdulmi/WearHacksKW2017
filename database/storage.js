@@ -10,8 +10,6 @@ firebase.initializeApp(config);
 var Firebase = firebase.database().ref();
 var patients = firebase.database().ref('patients');
 var perscriptions = firebase.database().ref('perscriptions');
-var twilio = require('texting/text')
-
 
 
 function schedule(frequency, duration, time){
@@ -206,14 +204,14 @@ function sendMessage(perscription, perscriptionKey){
               console.log(number)
               console.log(message)
                 if (pat.val().Method == 0){
-                    twilio.text(number, message);
+                    text.text(number, message);
                 }
                 else if (pat.val().Method == 1){
-                    twilio.call(number, message.replace(/ /g,"+"));
+                    text.call(number, message.replace(/ /g,"+"));
                 }
                 else if (pat.val().Method == 2){
-                    twilio.text(number, message);
-                    twilio.call(number, message.replace(/ /g,"+"));
+                    text.text(number, message);
+                    text.call(number, message.replace(/ /g,"+"));
                 }
             });
         }
