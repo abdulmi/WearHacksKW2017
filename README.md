@@ -3,4 +3,6 @@ Abdulkader Al-mitwaly
 Meggie Chen
 Veljko Dimic
 Dan Kim
-Wendy Young
+Wendy Young  
+  
+https://devpost.com/software/safescription
